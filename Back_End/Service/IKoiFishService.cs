@@ -80,8 +80,7 @@ public class KoiFishService : ControllerBase, IKoiFishService
         try
         {
             var koiFish = _context.FishKoi
-                .Where(r => r.koi_id == searchKoiDTO.koi_id)
-                .Include(e => e.User);// Bao gồm thông tin người sở hữu
+                .FirstOrDefault(r => r.koi_id == searchKoiDTO.koi_id);// Bao gồm thông tin người sở hữu
 
             //Nếu list null trả về badrequest
             if (koiFish == null)
@@ -89,7 +88,27 @@ public class KoiFishService : ControllerBase, IKoiFishService
                 return BadRequest("No fish!");
             }
 
-            return new OkObjectResult(koiFish);
+            var koiFishDto = new KoiFishDTO
+            {
+                koi_id = koiFish?.koi_id,
+                koi_name = koiFish.koi_name,
+                koi_age = koiFish.koi_age,
+                koi_size = koiFish.koi_size,
+                koi_variety = koiFish.koi_variety,
+                userId = koiFish.users_id,
+                //users_id = new UserDTO
+                //{
+                //    user_id = koiFish.User.user_id,
+                //    Username = koiFish.User.Username,
+                //    full_name = koiFish.User.full_name,
+                //    email = koiFish.User.Email,
+                //    phone = koiFish.User.Phone,
+                //    role_id = koiFish.User.role_id,
+                //    balance = koiFish.User.Balance,
+                //},
+            };
+
+            return Ok(koiFishDto);
         }
         catch (Exception ex) { return BadRequest(ex.Message); }
     }
