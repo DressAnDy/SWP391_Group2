@@ -3,54 +3,104 @@ using KoiBet.DTO.Award;
 using KoiBet.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Service.ICompetitionService;
 using System.Threading.Tasks;
 
 namespace KoiBet.Service
 {
     public interface IAwardService
     {
-        Task<IActionResult> HandleGetAllAwards();
+        //Task<IActionResult> HandleGetAllAwards();
         Task<IActionResult> HandleCreateAward(CreateAwardDTO createAwardDTO);
         Task<IActionResult> HandleUpdateAward(string awardId, UpdateAwardDTO updateAwardDTO);
         Task<IActionResult> HandleDeleteAward(string awardId);
         Task<IActionResult> HandleGetAwardById(string awardId);
+        Task<IActionResult> HandleGetAllAwardsWithCompetitions();
     }
 
     public class AwardService : ControllerBase, IAwardService
     {
         private readonly ApplicationDbContext _context;
+        private readonly Lazy<ICompetitionService> _competitionService;
 
-        public AwardService(ApplicationDbContext context)
+        public AwardService(ApplicationDbContext context, Lazy<ICompetitionService> competitionService)
         {
+            _competitionService = competitionService;
             _context = context;
         }
 
         // Get all Awards
-        public async Task<IActionResult> HandleGetAllAwards()
+        //public async Task<IActionResult> HandleGetAllAwards()
+        //{
+        //    try
+        //    {
+        //        var awards = await _context.Award
+        //            .Select(a => new AwardDTO
+        //            {
+        //                award_id = a.award_id,
+        //                award_name = a.award_name,
+        //                quantity = a.quantity
+        //            })
+        //            .ToListAsync();
+
+        //        if (!awards.Any())
+        //        {
+        //            return NotFound("No awards found!");
+        //        }
+
+        //        return Ok(awards);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Error retrieving awards: {ex.Message}");
+        //    }
+        //}
+
+        public async Task<IActionResult> HandleGetAllAwardsWithCompetitions()
         {
             try
             {
-                var awards = await _context.Award
-                    .Select(a => new AwardDTO
-                    {
-                        award_id = a.award_id,
-                        award_name = a.award_name,
-                        quantity = a.quantity
-                    })
-                    .ToListAsync();
+                var awardsWithCompetitions = await (from a in _context.Award
+                                                    join c in _context.CompetitionKoi on a.award_id equals c.award_id into competitions
+                                                    from comp in competitions.DefaultIfEmpty()
+                                                    select new
+                                                    {
+                                                        award_id = a.award_id,
+                                                        award_name = a.award_name,
+                                                        quantity = a.quantity,
+                                                        competition = comp == null ? null : new
+                                                        {
+                                                            competition_id = comp.competition_id,
+                                                            competition_name = comp.competition_name,
+                                                            competition_description = comp.competition_description,
+                                                            start_time = comp.start_time,
+                                                            end_time = comp.end_time,
+                                                            status_competition = comp.status_competition,
+                                                            category_id = comp.category_id,
+                                                            koi_id = comp.koi_id,
+                                                            referee_id = comp.referee_id,
+                                                            rounds = comp.rounds,
+                                                            competition_img = comp.competition_img
+                                                        }
+                                                    })
+                                                   .ToListAsync();
 
-                if (!awards.Any())
+                if (!awardsWithCompetitions.Any())
                 {
-                    return NotFound("No awards found!");
+                    return NotFound("No awards or competitions found!");
                 }
 
-                return Ok(awards);
+                return Ok(awardsWithCompetitions);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error retrieving awards: {ex.Message}");
+                return BadRequest($"Error retrieving awards and competitions: {ex.Message}");
             }
         }
+
+
+
+
 
         // Create a new Award
         public async Task<IActionResult> HandleCreateAward(CreateAwardDTO createAwardDTO)
@@ -149,25 +199,42 @@ namespace KoiBet.Service
         {
             try
             {
-                var award = await _context.Award
-                    .Select(a => new AwardDTO
-                    {
-                        award_id = a.award_id,
-                        award_name = a.award_name,
-                        quantity = a.quantity
-                    })
-                    .FirstOrDefaultAsync(a => a.award_id == awardId);
+                var awardWithCompetition = await (from a in _context.Award
+                                                  join c in _context.CompetitionKoi on a.award_id equals c.award_id into competitions
+                                                  from comp in competitions.DefaultIfEmpty()
+                                                  where a.award_id == awardId
+                                                  select new
+                                                  {
+                                                      award_id = a.award_id,
+                                                      award_name = a.award_name,
+                                                      quantity = a.quantity,
+                                                      competition = comp == null ? null : new
+                                                      {
+                                                          competition_id = comp.competition_id,
+                                                          competition_name = comp.competition_name,
+                                                          competition_description = comp.competition_description,
+                                                          start_time = comp.start_time,
+                                                          end_time = comp.end_time,
+                                                          status_competition = comp.status_competition,
+                                                          category_id = comp.category_id,
+                                                          koi_id = comp.koi_id,
+                                                          referee_id = comp.referee_id,
+                                                          rounds = comp.rounds,
+                                                          competition_img = comp.competition_img
+                                                      }
+                                                  })
+                                                  .FirstOrDefaultAsync();
 
-                if (award == null)
+                if (awardWithCompetition == null)
                 {
                     return NotFound("Award not found!");
                 }
 
-                return Ok(award);
+                return Ok(awardWithCompetition);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error retrieving award: {ex.Message}");
+                return BadRequest($"Error retrieving award and competition information: {ex.Message}");
             }
         }
     }

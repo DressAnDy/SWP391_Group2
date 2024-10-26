@@ -31,7 +31,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var registrations = await _context.KoiRegistrations
+                var registrations = await _context.KoiRegistration
                     .Select(reg => new KoiRegistrationDTO
                     {
                         RegistrationId = reg.RegistrationId,
@@ -65,7 +65,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var lastRegistration = await _context.KoiRegistrations
+                var lastRegistration = await _context.KoiRegistration
                     .OrderByDescending(r => r.RegistrationId)
                     .FirstOrDefaultAsync();
 
@@ -94,7 +94,7 @@ namespace KoiBet.Service
                     RegistrationFee = createKoiRegistrationDto.RegistrationFee
                 };
 
-                _context.KoiRegistrations.Add(newKoiRegistration);
+                _context.KoiRegistration.Add(newKoiRegistration);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -116,7 +116,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var registration = await _context.KoiRegistrations
+                var registration = await _context.KoiRegistration
                     .FirstOrDefaultAsync(r => r.RegistrationId == registrationId);
 
                 if (registration == null)
@@ -133,7 +133,7 @@ namespace KoiBet.Service
                 registration.EndDates = updateKoiRegistrationDto.EndDates;
                 registration.RegistrationFee = updateKoiRegistrationDto.RegistrationFee;
 
-                _context.KoiRegistrations.Update(registration);
+                _context.KoiRegistration.Update(registration);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -155,7 +155,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var registration = await _context.KoiRegistrations
+                var registration = await _context.KoiRegistration
                     .FirstOrDefaultAsync(r => r.RegistrationId == registrationId);
 
                 if (registration == null)
@@ -163,7 +163,7 @@ namespace KoiBet.Service
                     return NotFound("Koi registration not found!");
                 }
 
-                _context.KoiRegistrations.Remove(registration);
+                _context.KoiRegistration.Remove(registration);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -185,7 +185,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var registration = await _context.KoiRegistrations
+                var registration = await _context.KoiRegistration
                     .Select(r => new KoiRegistrationDTO
                     {
                         RegistrationId = r.RegistrationId,

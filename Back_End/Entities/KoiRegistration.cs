@@ -38,10 +38,10 @@ namespace KoiBet.Entities
         [DataType(DataType.Currency)]
         public decimal RegistrationFee { get; set; }
 
-        [ForeignKey("KoiId")]
+        [ForeignKey("koi_id")]
         public virtual FishKoi FishKoi { get; set; }
 
-        [ForeignKey("CompetitionId")]
+        [ForeignKey("competition_id")]
         public virtual CompetitionKoi CompetitionKoi { get; set; }
 
         [ForeignKey("CategoryId")]

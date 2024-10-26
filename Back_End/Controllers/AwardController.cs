@@ -40,10 +40,16 @@ namespace KoiBet.Controllers
             return await _awardService.HandleGetAwardById(awardId);
         }
 
-        [HttpGet("Get All Awards")]
-        public async Task<IActionResult> GetAllAwards()
+        //[HttpGet("Get All Awards")]
+        //public async Task<IActionResult> GetAllAwards()
+        //{
+        //    return await _awardService.HandleGetAllAwards();
+        //}
+
+        [HttpGet("Get All Award")]
+        public async Task<IActionResult> GetAllAward()
         {
-            return await _awardService.HandleGetAllAwards();
+            return await _awardService.HandleGetAllAwardsWithCompetitions();
         }
     }
 }

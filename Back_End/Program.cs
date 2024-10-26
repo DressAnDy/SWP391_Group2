@@ -105,6 +105,8 @@ builder.Services.AddScoped<IVNPayService, VnPayService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRefereeService, RefereeService>();
 builder.Services.AddScoped<IAwardService, AwardService>();
+builder.Services.AddScoped<IKoiRegistrationService, KoiRegistrationService>();
+builder.Services.AddScoped(provider => new Lazy<ICompetitionService>(() => provider.GetRequiredService<ICompetitionService>()));
 
 var app = builder.Build();
 
