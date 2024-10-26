@@ -1,8 +1,13 @@
-﻿using KoiBet.Data;
+﻿using DTO.KoiFish;
+using KoiBet.Data;
+using KoiBet.DTO.Competition;
+using KoiBet.DTO.KoiCategory;
 using KoiBet.DTO.KoiRegistration;
 using KoiBet.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Service.ICompetitionService;
+using Service.KoiFishService;
 
 namespace KoiBet.Service
 {
@@ -19,11 +24,18 @@ namespace KoiBet.Service
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<KoiRegistrationService> _logger;
+        private readonly ICompetitionService _competitionService;
+        private readonly IKoiCategoryService _koiCategoryService;
+        private readonly IKoiFishService _koiService;
 
-        public KoiRegistrationService(ApplicationDbContext context, ILogger<KoiRegistrationService> logger)
+
+        public KoiRegistrationService(ApplicationDbContext context, ILogger<KoiRegistrationService> logger, IKoiFishService koiService, ICompetitionService competitionService, IKoiCategoryService koiCategoryService)
         {
             _context = context;
             _logger = logger;
+            _koiService = koiService;
+            _koiCategoryService = koiCategoryService;
+            _competitionService = competitionService;
         }
 
         // Get all KoiRegistrations
@@ -45,6 +57,37 @@ namespace KoiBet.Service
                         RegistrationFee = reg.RegistrationFee
                     })
                     .ToListAsync();
+
+                foreach(var registration in registrations)
+                {
+                    if (!string.IsNullOrEmpty(registration.CompetitionId))
+                    {
+                        var competitionResult = await _competitionService.HandleGetCompetition(registration.CompetitionId) as OkObjectResult;
+                        if(competitionResult?.Value is CompetitionKoiDTO competition)
+                        {
+                            registration.competition = competition;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(registration.CategoryId))
+                    {
+                        var koicategoryResult = await _koiCategoryService.HandleGetKoiCategory(registration.CategoryId) as OkObjectResult;
+                        if(koicategoryResult?.Value is KoiCategoryDTO koiCategory)
+                        {
+                            registration.koicategory = koiCategory;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(registration.KoiId))
+                    {
+                        var fishkoiResult = await _koiService.HandleGetKoiFishById(new SearchKoiDTO { koi_id = registration.KoiId.ToString() }) as OkObjectResult;
+                        if(fishkoiResult?.Value is KoiFishDTO koiFish)
+                        {
+                            registration.koiFish = koiFish;
+                        }
+                    }
+                }
+
 
                 if (!registrations.Any())
                 {

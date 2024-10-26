@@ -1,4 +1,8 @@
-﻿namespace KoiBet.DTO.KoiRegistration
+﻿using DTO.KoiFish;
+using KoiBet.DTO.Competition;
+using KoiBet.DTO.KoiCategory;
+
+namespace KoiBet.DTO.KoiRegistration
 {
     public class KoiRegistrationDTO
     {
@@ -11,5 +15,11 @@
         public DateTime? StartDates { get; set; }       // Ngày bắt đầu
         public DateTime? EndDates { get; set; }         // Ngày kết thúc
         public decimal RegistrationFee { get; set; }    // Phí đăng ký
+
+        public CompetitionKoiDTO competition {  get; set; }
+
+        public KoiCategoryDTO koicategory { get; set; }
+
+        public KoiFishDTO koiFish { get; set; }
     }
 }
