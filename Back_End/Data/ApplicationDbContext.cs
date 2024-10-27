@@ -18,8 +18,8 @@ namespace KoiBet.Data
         public DbSet<Award> Award { get; set; }
         public DbSet<CompetitionKoi> CompetitionKoi { get; set; }
         public DbSet<KoiRegistration> KoiRegistration { get; set; }
-        public DbSet<CompetitionRound> CompetitionRounds { get; set; }
-        public DbSet<CompetitionMatch> CompetitionMatches { get; set; }
+        public DbSet<CompetitionRound> CompetitionRound { get; set; }
+        public DbSet<CompetitionMatch> CompetitionMatch { get; set; }
         public DbSet<KoiScore> KoiScores { get; set; }
         public DbSet<BetKoi> BetKois { get; set; }
 

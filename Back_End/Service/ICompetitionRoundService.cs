@@ -29,7 +29,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var rounds = await _context.CompetitionRounds
+                var rounds = await _context.CompetitionRound
                     .Select(round => new CompetitionRoundDTO
                     {
                         RoundId = round.RoundId,
@@ -56,7 +56,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var lastRound = await _context.CompetitionRounds
+                var lastRound = await _context.CompetitionRound
                     .OrderByDescending(r => r.RoundId)
                     .FirstOrDefaultAsync();
 
@@ -79,7 +79,7 @@ namespace KoiBet.Service
                     competition_id = createRoundDto.CompetitionId
                 };
 
-                _context.CompetitionRounds.Add(newRound);
+                _context.CompetitionRound.Add(newRound);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -100,7 +100,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var round = await _context.CompetitionRounds
+                var round = await _context.CompetitionRound
                     .FirstOrDefaultAsync(r => r.RoundId == roundId);
 
                 if (round == null)
@@ -111,7 +111,7 @@ namespace KoiBet.Service
                 round.Match = updateRoundDto.Match;
                 round.competition_id = updateRoundDto.CompetitionId;
 
-                _context.CompetitionRounds.Update(round);
+                _context.CompetitionRound.Update(round);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -132,7 +132,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var round = await _context.CompetitionRounds
+                var round = await _context.CompetitionRound
                     .FirstOrDefaultAsync(r => r.RoundId  == roundId);
 
                 if (round == null)
@@ -140,7 +140,7 @@ namespace KoiBet.Service
                     return NotFound("Round not found!");
                 }
 
-                _context.CompetitionRounds.Remove(round);
+                _context.CompetitionRound.Remove(round);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -161,7 +161,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var round = await _context.CompetitionRounds
+                var round = await _context.CompetitionRound
                     .Select(r => new CompetitionRoundDTO
                     {
                         RoundId = r.RoundId,
