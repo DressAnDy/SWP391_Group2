@@ -1,4 +1,4 @@
-namespace KoiBet.DTO.KoiCategory
+namespace KoiBet.DTO
 {
     public class UpdateKoiCategoryDTO
     {

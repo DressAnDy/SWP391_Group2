@@ -1,4 +1,4 @@
-﻿namespace KoiBet.DTO.Award
+﻿namespace KoiBet.DTO
 {
     public class AwardDTO
     {

@@ -1,6 +1,6 @@
 ﻿using DTO.KoiFish;
 using KoiBet.DTO.Competition;
-using KoiBet.DTO.KoiCategory;
+using KoiBet.DTO;
 
 namespace KoiBet.DTO.KoiRegistration
 {

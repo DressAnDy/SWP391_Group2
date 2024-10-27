@@ -28,7 +28,11 @@ namespace KoiBet.Controllers
             return await _competitionService.HandleGetCompetition(competitionId);
         }
 
-
+        [HttpGet("Get competition By UserID")]
+        public async Task<IActionResult> GetCompetitionByUserId([FromQuery] GetCompeByUserIdDTO getCompeByUserIdDTO)
+        {
+            return await _competitionService.HandleGetCompetitionByUserId(getCompeByUserIdDTO);
+        }
 
         [HttpPost("Create CompetitionKoi")]
         public async Task<IActionResult> CreateCompetition([FromBody] CreateCompetitionDTO _createCompetition)

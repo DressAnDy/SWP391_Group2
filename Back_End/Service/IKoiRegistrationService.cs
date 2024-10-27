@@ -1,7 +1,7 @@
 ﻿using DTO.KoiFish;
 using KoiBet.Data;
 using KoiBet.DTO.Competition;
-using KoiBet.DTO.KoiCategory;
+using KoiBet.DTO;
 using KoiBet.DTO.KoiRegistration;
 using KoiBet.Entities;
 using Microsoft.AspNetCore.Mvc;

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using KoiBet.DTO.KoiCategory;
+using KoiBet.DTO;
 using KoiBet.Service;
 
 namespace KoiBet.Controllers

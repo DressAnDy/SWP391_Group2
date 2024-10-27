@@ -2,7 +2,7 @@
 using KoiBet.DTO.KoiStandard;
 using KoiBet.Entities;
 
-namespace KoiBet.DTO.KoiCategory
+namespace KoiBet.DTO
 {
     public class KoiCategoryDTO
     {

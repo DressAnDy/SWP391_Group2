@@ -1,6 +1,6 @@
 using KoiBet.DTO.Competition;
 
-namespace KoiBet.DTO.KoiCategory
+namespace KoiBet.DTO
 {
     public class CreateKoiCategoryDTO
     {

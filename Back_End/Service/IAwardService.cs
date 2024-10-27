@@ -1,5 +1,5 @@
 ﻿using KoiBet.Data;
-using KoiBet.DTO.Award;
+using KoiBet.DTO;
 using KoiBet.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
