@@ -29,7 +29,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var matches = await _context.CompetitionMatches
+                var matches = await _context.CompetitionMatch
                     .Select(match => new CompetitionMatchDTO
                     {
                         MatchId = match.match_id,
@@ -58,7 +58,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var lastMatch = await _context.CompetitionMatches
+                var lastMatch = await _context.CompetitionMatch
                     .OrderByDescending(m => m.match_id)
                     .FirstOrDefaultAsync();
 
@@ -83,7 +83,7 @@ namespace KoiBet.Service
                     result = createMatchDto.Result
                 };
 
-                _context.CompetitionMatches.Add(newMatch);
+                _context.CompetitionMatch.Add(newMatch);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -104,7 +104,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var match = await _context.CompetitionMatches
+                var match = await _context.CompetitionMatch
                     .FirstOrDefaultAsync(m => m.match_id == matchId);
 
                 if (match == null)
@@ -117,7 +117,7 @@ namespace KoiBet.Service
                 match.second_koi = updateMatchDto.SecondKoi;
                 match.result = updateMatchDto.Result;
 
-                _context.CompetitionMatches.Update(match);
+                _context.CompetitionMatch.Update(match);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -138,7 +138,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var match = await _context.CompetitionMatches
+                var match = await _context.CompetitionMatch
                     .FirstOrDefaultAsync(m => m.match_id == matchId);
 
                 if (match == null)
@@ -146,7 +146,7 @@ namespace KoiBet.Service
                     return NotFound("Match not found!");
                 }
 
-                _context.CompetitionMatches.Remove(match);
+                _context.CompetitionMatch.Remove(match);
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
@@ -167,7 +167,7 @@ namespace KoiBet.Service
         {
             try
             {
-                var match = await _context.CompetitionMatches
+                var match = await _context.CompetitionMatch
                     .Select(m => new CompetitionMatchDTO
                     {
                         MatchId = m.match_id,
