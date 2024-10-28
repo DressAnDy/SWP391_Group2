@@ -22,6 +22,8 @@ namespace KoiBet.Entities
         [Column("competition_id")]
         public string competition_id { get; set; } = string.Empty;
 
+        public string bet_amount { get; set; }
+
         [JsonIgnore]
         public virtual Users User { get; set; }
         public virtual KoiRegistration KoiRegistration { get; set; }

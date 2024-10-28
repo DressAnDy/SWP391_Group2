@@ -9,7 +9,7 @@ using KoiBet.DTO;
 using KoiBet.DTO.Referee;
 using System.ComponentModel.Design;
 using Service.KoiFishService;
-using DTO.KoiFish;
+using DTO;
 
 namespace Service.ICompetitionService
 {
@@ -20,7 +20,6 @@ namespace Service.ICompetitionService
         Task<IActionResult> HandleUpdateCompetition(string CompetitionId, UpdateCompetitionDTO updateCompetitionDto);
         Task<IActionResult> HandleDeleteCompetition(string competitionId);
         Task<IActionResult> HandleGetCompetition(string competitionId);
-        Task<IActionResult> HandleGetCompetitionByUserId(GetCompeByUserIdDTO getCompeByUserIdDTO);
     }
 
     public class CompetitionService : ControllerBase, ICompetitionService
@@ -63,6 +62,7 @@ namespace Service.ICompetitionService
                         referee_id = competition.referee_id,
                         award_id = competition.award_id,
                         CompetitionImg = competition.competition_img,
+                        number_attendees = competition.number_attendees,
                     })
                     .ToListAsync();
 
@@ -114,6 +114,13 @@ namespace Service.ICompetitionService
                             competition.Award = award;
                         }
                     }
+
+                    //// Get KoiRegistration information based on koi_id
+                    //var KoiRegistrations = _context.KoiRegistration
+                    //    .Where(c => c.competition_id == competition.CompetitionId)
+                    //    .ToList();
+
+                    //competition.KoiRegistrations = KoiRegistrations;
                 }
 
                 return Ok(competitions);
@@ -159,7 +166,8 @@ namespace Service.ICompetitionService
                     koi_id = createCompetitionDto.koi_id,
                     referee_id = createCompetitionDto.referee_id,
                     award_id = createCompetitionDto.award_id,
-                    competition_img = createCompetitionDto.competition_img
+                    competition_img = createCompetitionDto.competition_img,
+                    number_attendees = createCompetitionDto.number_attendees,
                 };
 
                 _context.CompetitionKoi.Add(newCompetition);
@@ -202,6 +210,7 @@ namespace Service.ICompetitionService
                 competition.referee_id = updateCompetitionDto.RefereeId;
                 competition.award_id = updateCompetitionDto.AwardId;
                 competition.competition_img = updateCompetitionDto.CompetitionImg;
+                competition.number_attendees = updateCompetitionDto.number_attendees;
 
                 _context.CompetitionKoi.Update(competition);
                 var result = await _context.SaveChangesAsync();
@@ -267,7 +276,8 @@ namespace Service.ICompetitionService
                         koi_id = c.koi_id,
                         referee_id = c.referee_id,
                         award_id = c.award_id,
-                        CompetitionImg = c.competition_img
+                        CompetitionImg = c.competition_img,
+                        number_attendees = c.number_attendees,
                     })
                     .FirstOrDefaultAsync(c => c.CompetitionId == competitionId);
 
@@ -284,80 +294,6 @@ namespace Service.ICompetitionService
             }
         }
 
-        public async Task<IActionResult> HandleGetCompetitionByUserId(GetCompeByUserIdDTO getCompeByUserIdDTO)
-        {
-            try
-            {
-                var competition = await _context.CompetitionKoi
-                    .Select(c => new CompetitionKoiDTO
-                    {
-                        CompetitionId = c.competition_id,
-                        CompetitionName = c.competition_name,
-                        CompetitionDescription = c.competition_description,
-                        StartTime = c.start_time,
-                        EndTime = c.end_time,
-                        StatusCompetition = c.status_competition,
-                        Round = c.rounds,
-                        category_id = c.category_id,
-                        koi_id = c.koi_id,
-                        referee_id = c.referee_id,
-                        award_id = c.award_id,
-                        CompetitionImg = c.competition_img
-                    })
-                    .FirstOrDefaultAsync(c => c.koi_id == getCompeByUserIdDTO.koiId);
-
-                if (competition == null)
-                {
-                    return NotFound("Competition not found!");
-                }
-
-                // Get Koi Category based on category_id
-                if (!string.IsNullOrEmpty(competition.category_id?.ToString()))
-                {
-                    var categoryResult = await _koiCategoryService.HandleGetKoiCategory(competition.category_id.ToString()) as OkObjectResult;
-                    if (categoryResult?.Value is KoiCategoryDTO category)
-                    {
-                        competition.KoiCategory = category;
-                    }
-                }
-
-                // Get KoiFish information based on koi_id
-                if (!string.IsNullOrEmpty(competition.koi_id?.ToString()))
-                {
-                    var koiResult = await _koiService.HandleGetKoiFishById(new SearchKoiDTO { koi_id = competition.koi_id.ToString() }) as OkObjectResult;
-
-                    if (koiResult?.Value is KoiFishDTO koi)
-                    {
-                        competition.KoiFish = koi;
-                    }
-                }
-
-                // Get Referee information based on referee_id
-                if (!string.IsNullOrEmpty(competition.referee_id?.ToString()))
-                {
-                    var refereeResult = await _refereeService.HandleGetReferee(competition.referee_id.ToString()) as OkObjectResult;
-                    if (refereeResult?.Value is RefereeDTO referee)
-                    {
-                        competition.Referee = referee;
-                    }
-                }
-
-                // Get Award information based on award_id
-                if (!string.IsNullOrEmpty(competition.award_id?.ToString()))
-                {
-                    var awardResult = await _awardService.HandleGetAwardById(competition.award_id.ToString()) as OkObjectResult;
-                    if (awardResult?.Value is AwardDTO award)
-                    {
-                        competition.Award = award;
-                    }
-                }
-
-                return Ok(competition);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error retrieving competition: {ex.Message}");
-            }
-        }
+        
     }
 }

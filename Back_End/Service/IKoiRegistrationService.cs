@@ -1,8 +1,7 @@
-﻿using DTO.KoiFish;
+﻿using DTO;
 using KoiBet.Data;
 using KoiBet.DTO.Competition;
 using KoiBet.DTO;
-using KoiBet.DTO.KoiRegistration;
 using KoiBet.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,9 +14,11 @@ namespace KoiBet.Service
     {
         Task<IActionResult> HandleGetAllKoiRegistrations();
         Task<IActionResult> HandleCreateNewKoiRegistration(CreateKoiRegistrationDTO createKoiRegistrationDto);
-        Task<IActionResult> HandleUpdateKoiRegistration(string registrationId, UpdateKoiRegistrationDTO updateKoiRegistrationDto);
+        Task<IActionResult> HandleUpdateKoiRegistration(UpdateKoiRegistrationDTO updateKoiRegistrationDto);
         Task<IActionResult> HandleDeleteKoiRegistration(string registrationId);
         Task<IActionResult> HandleGetKoiRegistration(string registrationId);
+        Task<IActionResult> HandleGetKoiRegistrationByKoiId(string registrationId);
+        Task<IActionResult> HandleGetKoiRegistrationByCompetitionId(string competitionId);
     }
 
     public class KoiRegistrationService : ControllerBase, IKoiRegistrationService
@@ -129,11 +130,10 @@ namespace KoiBet.Service
                     RegistrationId = $"REG_{newIdNumber}",
                     koi_id = createKoiRegistrationDto.KoiId,
                     competition_id = createKoiRegistrationDto.CompetitionId,
-                    StatusRegistration = createKoiRegistrationDto.StatusRegistration,
+                    StatusRegistration = "Pending",
                     CategoryId = createKoiRegistrationDto.CategoryId,
-                    SlotRegistration = createKoiRegistrationDto.SlotRegistration,
-                    StartDates = createKoiRegistrationDto.StartDates,
-                    EndDates = createKoiRegistrationDto.EndDates,
+                    StartDates = DateTime.Now,
+                    EndDates = DateTime.Now,
                     RegistrationFee = createKoiRegistrationDto.RegistrationFee
                 };
 
@@ -155,32 +155,61 @@ namespace KoiBet.Service
         }
 
         // Update an existing KoiRegistration
-        public async Task<IActionResult> HandleUpdateKoiRegistration(string registrationId, UpdateKoiRegistrationDTO updateKoiRegistrationDto)
+        public async Task<IActionResult> HandleUpdateKoiRegistration(UpdateKoiRegistrationDTO updateKoiRegistrationDto)
         {
             try
             {
+                // Validate input
+                if (updateKoiRegistrationDto == null)
+                {
+                    _logger.LogWarning("UpdateKoiRegistrationDTO is null");
+                    return BadRequest("Invalid input data");
+                }
+
+                // Kiểm tra registration tồn tại
                 var registration = await _context.KoiRegistration
-                    .FirstOrDefaultAsync(r => r.RegistrationId == registrationId);
+                    .FirstOrDefaultAsync(r => r.RegistrationId == updateKoiRegistrationDto.RegistrationId);
 
                 if (registration == null)
                 {
+                    _logger.LogWarning($"Registration not found with ID: {updateKoiRegistrationDto.RegistrationId}");
                     return NotFound("Koi registration not found!");
                 }
 
+                // Đếm số lượng attendees
+                var attendeesCount = await _context.KoiRegistration
+                    .Where(c => c.competition_id == updateKoiRegistrationDto.CompetitionId)
+                    .CountAsync();  // Sử dụng CountAsync thay vì ToList
+
+                if (!string.IsNullOrEmpty(updateKoiRegistrationDto.CompetitionId))
+                {
+                    var competitionResult = await _competitionService.HandleGetCompetition(updateKoiRegistrationDto.CompetitionId) as OkObjectResult;
+                    if (competitionResult?.Value is CompetitionKoiDTO competition)
+                    {
+                        if (attendeesCount >= competition.number_attendees)
+                        {
+                            return BadRequest("Competition is full!");
+                        }
+                    }
+                }
+
+                // Cập nhật thông tin registration
+                registration.SlotRegistration = attendeesCount == 0 ? 0 : attendeesCount;
                 registration.koi_id = updateKoiRegistrationDto.KoiId;
                 registration.competition_id = updateKoiRegistrationDto.CompetitionId;
                 registration.StatusRegistration = updateKoiRegistrationDto.StatusRegistration;
                 registration.CategoryId = updateKoiRegistrationDto.CategoryId;
-                registration.SlotRegistration = updateKoiRegistrationDto.SlotRegistration;
-                registration.StartDates = updateKoiRegistrationDto.StartDates;
-                registration.EndDates = updateKoiRegistrationDto.EndDates;
-                registration.RegistrationFee = updateKoiRegistrationDto.RegistrationFee;
+                registration.StartDates = DateTime.Now;
+                registration.EndDates = DateTime.Now;
 
+                // Cập nhật vào database
                 _context.KoiRegistration.Update(registration);
+                
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)
                 {
+                    _logger.LogError("Failed to update registration in database");
                     return BadRequest("Failed to update koi registration!");
                 }
 
@@ -188,8 +217,8 @@ namespace KoiBet.Service
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating koi registration");
-                return BadRequest($"Error updating koi registration: {ex.Message}");
+                _logger.LogError(ex, "Error in HandleUpdateKoiRegistration");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -242,6 +271,74 @@ namespace KoiBet.Service
                         RegistrationFee = r.RegistrationFee
                     })
                     .FirstOrDefaultAsync(r => r.RegistrationId == registrationId);
+
+                if (registration == null)
+                {
+                    return NotFound("Koi registration not found!");
+                }
+
+                return Ok(registration);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving koi registration");
+                return BadRequest($"Error retrieving koi registration: {ex.Message}");
+            }
+        }
+
+        // Get a specific KoiRegistration by KoiID
+        public async Task<IActionResult> HandleGetKoiRegistrationByKoiId(string koiId)
+        {
+            try
+            {
+                var registration = await _context.KoiRegistration
+                    .Select(r => new KoiRegistrationDTO
+                    {
+                        RegistrationId = r.RegistrationId,
+                        KoiId = r.koi_id,
+                        CompetitionId = r.competition_id,
+                        StatusRegistration = r.StatusRegistration,
+                        CategoryId = r.CategoryId,
+                        SlotRegistration = r.SlotRegistration,
+                        StartDates = r.StartDates,
+                        EndDates = r.EndDates,
+                        RegistrationFee = r.RegistrationFee
+                    })
+                    .FirstOrDefaultAsync(r => r.KoiId == koiId);
+
+                if (registration == null)
+                {
+                    return NotFound("Koi registration not found!");
+                }
+
+                return Ok(registration);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving koi registration");
+                return BadRequest($"Error retrieving koi registration: {ex.Message}");
+            }
+        }
+
+        // Get a specific KoiRegistration by CompetitionID
+        public async Task<IActionResult> HandleGetKoiRegistrationByCompetitionId(string competitionId)
+        {
+            try
+            {
+                var registration = await _context.KoiRegistration
+                    .Select(r => new KoiRegistrationDTO
+                    {
+                        RegistrationId = r.RegistrationId,
+                        KoiId = r.koi_id,
+                        CompetitionId = r.competition_id,
+                        StatusRegistration = r.StatusRegistration,
+                        CategoryId = r.CategoryId,
+                        SlotRegistration = r.SlotRegistration,
+                        StartDates = r.StartDates,
+                        EndDates = r.EndDates,
+                        RegistrationFee = r.RegistrationFee
+                    })
+                    .FirstOrDefaultAsync(r => r.CompetitionId == competitionId);
 
                 if (registration == null)
                 {

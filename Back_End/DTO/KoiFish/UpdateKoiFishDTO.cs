@@ -1,4 +1,4 @@
-﻿namespace DTO.KoiFish;
+﻿namespace DTO;
 
 using KoiBet.DTO.User;
 

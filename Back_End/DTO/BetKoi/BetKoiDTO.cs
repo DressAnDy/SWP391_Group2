@@ -18,6 +18,8 @@ namespace KoiBet.DTO.BetKoi
         public string RegistrationId { get; set; }
 
         public string competition_id { get; set; }
+        public decimal bet_amount { get; set; }
+
 
         public CompetitionKoi? CompetitionKoi { get; set; } 
     }

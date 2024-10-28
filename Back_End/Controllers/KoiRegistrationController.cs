@@ -1,4 +1,4 @@
-﻿using KoiBet.DTO.KoiRegistration;
+﻿using KoiBet.DTO;
 using KoiBet.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +27,18 @@ namespace KoiBet.Controllers
             return await _koiRegistrationService.HandleGetKoiRegistration(koiRegistrationId);
         }
 
+        [HttpGet("Get KoiRegistrationByKoiId")]
+        public async Task<IActionResult> GetKoiRegistrationByKoiId([FromQuery] string koiId)
+        {
+            return await _koiRegistrationService.HandleGetKoiRegistrationByKoiId(koiId);
+        }
+
+        [HttpGet("Get KoiRegistrationByCompetitionId")]
+        public async Task<IActionResult> GetKoiRegistrationByCompetitionId([FromQuery] string competitionId)
+        {
+            return await _koiRegistrationService.HandleGetKoiRegistrationByCompetitionId(competitionId);
+        }
+
         [HttpDelete("Delete KoiRegistration")]
         public async Task<IActionResult> DeleteAward(string koiRegistrationId)
         {
@@ -45,14 +57,14 @@ namespace KoiBet.Controllers
         }
 
         [HttpPut("Update KoiRegistration")]
-        public async Task<IActionResult> UpdateKoiRegistration(string registrationId, [FromBody] UpdateKoiRegistrationDTO updateKoiRegistrationDto)
+        public async Task<IActionResult> UpdateKoiRegistration([FromBody] UpdateKoiRegistrationDTO updateKoiRegistrationDto)
         {
             if (updateKoiRegistrationDto == null)
             {
                 return BadRequest("Invalid update data.");
             }
 
-            return await _koiRegistrationService.HandleUpdateKoiRegistration(registrationId, updateKoiRegistrationDto);
+            return await _koiRegistrationService.HandleUpdateKoiRegistration(updateKoiRegistrationDto);
         }
 
 

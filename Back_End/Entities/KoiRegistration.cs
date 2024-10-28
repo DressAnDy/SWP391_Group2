@@ -19,7 +19,7 @@ namespace KoiBet.Entities
         public string competition_id { get; set; } = string.Empty;
 
         [Column("status_registration")]
-        public bool StatusRegistration { get; set; }
+        public string StatusRegistration { get; set; }
 
         [Column("category_id")] 
         [MaxLength(50)]

@@ -1,8 +1,7 @@
 ﻿using KoiBet.DTO;
-using DTO.KoiFish;
+using DTO;
 using KoiBet.DTO.Referee;
 using KoiBet.DTO;
-using DTO.KoiFish;
 using System.ComponentModel.DataAnnotations;
 using KoiBet.Entities;
 
@@ -22,12 +21,12 @@ namespace KoiBet.DTO.Competition
         public DateTime? EndTime { get; init; }
 
         public string? StatusCompetition { get; init; }
-
         public string? Round { get; init; }
         public string? category_id { get; set; }
         public string? koi_id { get; set; }
         public string? referee_id { get; set; }
         public string? award_id { get; set; }
+        public int number_attendees { get; set; }
 
         public KoiCategoryDTO? KoiCategory { get; set; }
 
@@ -36,18 +35,20 @@ namespace KoiBet.DTO.Competition
         public RefereeDTO? Referee { get; set; }
 
         public AwardDTO? Award { get; set; }
+        public List<KoiRegistration>? KoiRegistrations { get; set; }
 
         public string? CompetitionImg { get; set; }
     }
 
     public class GetCompeByUserIdDTO
     {
-        public string userId { get; set; }
-        public string userName { get; set; }
-        public string koiId { get; set; }
-        public string koiName { get; set; }
-        public string? phone {  get; set; }
-        public string? email { get; set; }
+        public string UserId { get; set; }
+        public string UserName { get; set; }
+        public string KoiId { get; set; }
+        public string KoiName { get; set; }
+        public string CompetitionId { get; set; }
+        public string? Phone {  get; set; }
+        public string? Email { get; set; }
     }
 
     public class CompetitionResponseDTO
@@ -79,5 +80,6 @@ namespace KoiBet.DTO.Competition
         public Award Award { get; set; }
 
         public string? CompetitionImg { get; set; }
+        public int number_attendees { get; set; }
     }
 }

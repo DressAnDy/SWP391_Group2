@@ -1,4 +1,4 @@
-﻿using DTO.KoiFish;
+﻿using DTO;
 using KoiBet.DTO.KoiStandard;
 using KoiBet.Entities;
 

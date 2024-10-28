@@ -15,5 +15,6 @@ namespace KoiBet.DTO.Competition
         public string award_id { get; set; }
         public string rounds { get; set; }
         public string competition_img { get; set; }
+        public int number_attendees { get; set; }
     }
 }

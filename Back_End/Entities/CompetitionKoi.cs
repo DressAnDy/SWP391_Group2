@@ -7,6 +7,7 @@ namespace KoiBet.Entities
     public class CompetitionKoi
     {
         [Key]
+        [Column("competition_id")]
         public string competition_id { get; set; }
 
         public string competition_name { get; set; }
@@ -39,6 +40,9 @@ namespace KoiBet.Entities
         public string rounds { get; set; }
 
         public string competition_img { get; set; }
+
+        [Column("number_attendees")]
+        public int number_attendees { get; set; } 
 
         [JsonIgnore]
         public virtual KoiCategory Category { get; set; }

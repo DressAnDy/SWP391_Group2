@@ -12,7 +12,7 @@ using BCrypt.Net;
 using Microsoft.Extensions.Configuration;
 using Service.JwtService;
 using Microsoft.AspNetCore.Http;
-using DTO.KoiFish;
+using DTO;
 
 public interface IKoiFishService
 {
