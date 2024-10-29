@@ -167,7 +167,8 @@ namespace Service.ICompetitionService
                     referee_id = createCompetitionDto.referee_id,
                     award_id = createCompetitionDto.award_id,
                     competition_img = createCompetitionDto.competition_img,
-                    number_attendees = createCompetitionDto.number_attendees,
+                    number_attendees = (int)Math.Pow(2, Double.Parse(createCompetitionDto.rounds)),
+                    //number_attendees = 2^(int.Parse(createCompetitionDto.rounds)),
                 };
 
                 _context.CompetitionKoi.Add(newCompetition);
@@ -204,50 +205,43 @@ namespace Service.ICompetitionService
                 DateTime startTime = competition.start_time;
                 DateTime endTime = competition.end_time;
                 competition.status_competition = updateCompetitionDto.StatusCompetition;
-                competition.rounds = updateCompetitionDto.Round;
                 competition.category_id = updateCompetitionDto.KoiCategoryId;
                 competition.koi_id = updateCompetitionDto.KoiFishId;
                 competition.referee_id = updateCompetitionDto.RefereeId;
                 competition.award_id = updateCompetitionDto.AwardId;
                 competition.competition_img = updateCompetitionDto.CompetitionImg;
-                competition.number_attendees = updateCompetitionDto.number_attendees;
-
-                _context.CompetitionKoi.Update(competition);
+                competition.number_attendees = (int)Math.Pow(2, Double.Parse(updateCompetitionDto.Round));
 
                 if(competition.status_competition == "Active")
                 {
-                    for (int i = 0; i < competition.rounds; i++)
+                    if(competition.rounds != updateCompetitionDto.Round)
                     {
-                        var round = new CompetitionRound
+                        var oldRound = _context.CompetitionRound
+                            .Where(c => c.competition_id == competition.competition_id)
+                            .ToList();
+
+                        _context.CompetitionRound
+                            .RemoveRange(oldRound);
+                        await _context.SaveChangesAsync();
+
+                        for (int i = 1; i <= int.Parse(updateCompetitionDto.Round); i++)
                         {
-                            RoundId = updateCompetitionDto.CompetitionId + "_" + "RND_" + i,
-                            Match = 2,
-                            competition_id = updateCompetitionDto.CompetitionId
-                        };
+                            var count = (int.Parse(updateCompetitionDto.Round) - i).ToString();
+                            var round = new CompetitionRound
+                            {
+                                RoundId = updateCompetitionDto.CompetitionId + "_RND_" + i,
+                                Match = (int)Math.Pow(2, Double.Parse(count)),
+                                competition_id = competition.competition_id
+                            };
 
-                        //var match_1 = new CompetitionMatch
-                        //{
-                        //    match_id = BCrypt.Net.BCrypt.HashPassword(id).Substring(0, 30),
-                        //    first_koiId1 = "TEMP_1",
-                        //    first_koiId2 = "TEMP_2",
-                        //    round_id = round.RoundId,
-                        //    result = "Pending"
-                        //};
-
-                        //var match_2 = new CompetitionMatch
-                        //{
-                        //    match_id = BCrypt.Net.BCrypt.HashPassword(id).Substring(0, 30),
-                        //    first_koiId1 = "TEMP_1",
-                        //    first_koiId2 = "TEMP_2",
-                        //    round_id = round.RoundId,
-                        //    result = "Pending"
-                        //};
-
-                        _context.CompetitionRound.Add(round);
-                        //_context.CompetitionMatch.Add(match_1);
-                        //_context.CompetitionMatch.Add(match_2);
+                            _context.CompetitionRound.Add(round);
+                        }
                     }
                 }
+
+                competition.rounds = updateCompetitionDto.Round;
+                _context.CompetitionKoi.Update(competition);
+
                 var result = await _context.SaveChangesAsync();
 
                 if (result == 0)

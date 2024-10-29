@@ -1,5 +1,5 @@
 ﻿using KoiBet.Data;
-using KoiBet.DTO.CompetitionMatch;
+using KoiBet.DTO;
 using KoiBet.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +11,7 @@ namespace KoiBet.Service
         Task<IActionResult> HandleGetAllMatches();
         Task<IActionResult> HandleCreateNewMatch(CreateCompetitionMatchDTO createMatchDto);
         Task<IActionResult> HandleUpdateMatch(string matchId, UpdateCompetitionMatchDTO updateMatchDto);
+        Task<IActionResult> HandleProcessingMatch(ProcessingMatchDTO ProcessingMatchDto);
         Task<IActionResult> HandleDeleteMatch(string matchId);
         Task<IActionResult> HandleGetMatch(string matchId);
     }
@@ -118,6 +119,36 @@ namespace KoiBet.Service
                 match.result = updateMatchDto.Result;
 
                 _context.CompetitionMatch.Update(match);
+                var result = await _context.SaveChangesAsync();
+
+                if (result != 1)
+                {
+                    return BadRequest("Failed to update match!");
+                }
+
+                return Ok(match);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error updating match: {ex.Message}");
+            }
+        }
+
+        // Update an existing Match result
+        public async Task<IActionResult> HandleProcessingMatch(ProcessingMatchDTO processingMatchDto)
+        {
+            try
+            {
+                var match = await _context.CompetitionMatch
+                    .FirstOrDefaultAsync(m => m.match_id == processingMatchDto.MatchId);
+
+                if (match == null)
+                {
+                    return NotFound("Match not found!");
+                }
+
+                _context.CompetitionMatch.Update(match);
+
                 var result = await _context.SaveChangesAsync();
 
                 if (result != 1)

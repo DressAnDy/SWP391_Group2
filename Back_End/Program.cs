@@ -102,6 +102,7 @@ builder.Services.AddScoped<IKoiStandardService, KoiStandardService>();
 builder.Services.AddScoped<IKoiCategoryService, KoiCategoryService>();
 builder.Services.AddScoped<ICompetitionRoundService, CompetitionRoundService>();
 builder.Services.AddScoped<ICompetitionMatchService, CompetitionMatchService>();
+builder.Services.AddScoped<IKoiScoreService, KoiScoreService>();
 builder.Services.AddScoped<ICompetitionService, CompetitionService>();
 builder.Services.AddScoped<IVNPayService, VnPayService>();
 builder.Services.AddScoped<IUserService, UserService>();

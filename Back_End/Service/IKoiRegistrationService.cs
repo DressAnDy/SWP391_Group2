@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Service.ICompetitionService;
 using Service.KoiFishService;
+using KoiBet.Infrastructure;
 
 namespace KoiBet.Service
 {
@@ -28,7 +29,7 @@ namespace KoiBet.Service
         private readonly ICompetitionService _competitionService;
         private readonly IKoiCategoryService _koiCategoryService;
         private readonly IKoiFishService _koiService;
-
+        private readonly IRegistrationRepo _registrationRepo;
 
         public KoiRegistrationService(ApplicationDbContext context, ILogger<KoiRegistrationService> logger, IKoiFishService koiService, ICompetitionService competitionService, IKoiCategoryService koiCategoryService)
         {
@@ -37,6 +38,7 @@ namespace KoiBet.Service
             _koiService = koiService;
             _koiCategoryService = koiCategoryService;
             _competitionService = competitionService;
+            _registrationRepo = new RegistrationRepo(context);
         }
 
         // Get all KoiRegistrations
@@ -159,6 +161,10 @@ namespace KoiBet.Service
         {
             try
             {
+                var registrationQuery = _context.KoiRegistration
+                    .Where(c => c.competition_id ==  updateKoiRegistrationDto.CompetitionId)
+                    .AsQueryable();
+
                 // Validate input
                 if (updateKoiRegistrationDto == null)
                 {
@@ -178,8 +184,8 @@ namespace KoiBet.Service
                 }
 
                 // Đếm số lượng attendees
-                var attendeesCount = await _context.KoiRegistration
-                    .Where(c => c.competition_id == updateKoiRegistrationDto.CompetitionId)
+                var attendeesCount = await registrationQuery
+                    .Where(c => c.StatusRegistration == "Accepted")
                     .CountAsync();  // Sử dụng CountAsync thay vì ToList
 
                 if (!string.IsNullOrEmpty(updateKoiRegistrationDto.CompetitionId))
@@ -195,7 +201,7 @@ namespace KoiBet.Service
                 }
 
                 // Cập nhật thông tin registration
-                registration.SlotRegistration = attendeesCount == 0 ? 0 : attendeesCount;
+                registration.SlotRegistration = attendeesCount + 1;
                 registration.koi_id = updateKoiRegistrationDto.KoiId;
                 registration.competition_id = updateKoiRegistrationDto.CompetitionId;
                 registration.StatusRegistration = updateKoiRegistrationDto.StatusRegistration;
@@ -218,11 +224,24 @@ namespace KoiBet.Service
 
                     user.Balance = user.Balance - registration.RegistrationFee;
                     _context.Users.Update(user);
+
+                    if(registration.SlotRegistration %  2 == 0)
+                    {
+                        var koi_1 = registrationQuery
+                            .FirstOrDefault(c => c.SlotRegistration == (registration.SlotRegistration - 1));
+
+                        var response = _registrationRepo.GenerateCompetitionMatch(koi_1, registration, registration.competition_id);
+
+                        if (response == 0) 
+                        {
+                            return NotFound("Unable to Update!");
+                        }
+                    }
                 }
                 
                 var result = await _context.SaveChangesAsync();
 
-                if (result == 0)
+                if (result != 0)
                 {
                     _logger.LogError("Failed to update registration in database");
                     return BadRequest("Failed to update koi registration!");

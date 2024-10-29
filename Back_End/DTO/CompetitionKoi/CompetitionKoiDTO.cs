@@ -21,7 +21,7 @@ namespace KoiBet.DTO.Competition
         public DateTime? EndTime { get; init; }
 
         public string? StatusCompetition { get; init; }
-        public int Round { get; init; }
+        public string Round { get; init; }
         public string? category_id { get; set; }
         public string? koi_id { get; set; }
         public string? referee_id { get; set; }
@@ -65,7 +65,7 @@ namespace KoiBet.DTO.Competition
 
         public string? StatusCompetition { get; init; }
 
-        public int? Round { get; init; }
+        public string? Round { get; init; }
         //public string? CategoryId { get; set; }
         public string? KoiId { get; set; }
         //public string? RefereeId { get; set; }

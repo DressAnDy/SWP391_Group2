@@ -1,5 +1,5 @@
 ﻿using KoiBet.DTO.Competition;
-using KoiBet.DTO.CompetitionMatch;
+using KoiBet.DTO;
 
 namespace KoiBet.DTO.CompetitionRound
 {

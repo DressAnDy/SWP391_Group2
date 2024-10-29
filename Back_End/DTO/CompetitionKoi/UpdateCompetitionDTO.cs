@@ -13,7 +13,7 @@ namespace KoiBet.DTO.Competition
 
         public string? StatusCompetition { get; init; }
 
-        public int Round { get; init; }
+        public string Round { get; init; }
 
         public string? KoiCategoryId { get; init; }
 
@@ -24,6 +24,6 @@ namespace KoiBet.DTO.Competition
         public string? AwardId { get; init; }
 
         public string? CompetitionImg { get; init; }
-        public int number_attendees { get; init; }
+        //public int number_attendees { get; init; }
     }
 }

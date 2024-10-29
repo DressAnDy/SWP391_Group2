@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace KoiBet.Entities
 {
@@ -8,7 +9,7 @@ namespace KoiBet.Entities
         [Key]
         [Column("score_id")]
         [MaxLength(50)]
-        public string ScoreId { get; set; } = string.Empty;
+        public string score_id { get; set; } = string.Empty;
 
         [Column("koi_id")]
         [MaxLength(50)]
@@ -24,16 +25,14 @@ namespace KoiBet.Entities
 
         [Column("score_koi")]
         [DataType(DataType.Currency)]
-        public decimal ScoreKoi { get; set; }
+        public decimal score_koi { get; set; }
 
         // Navigation properties
-        [ForeignKey("KoiId")]
+        [JsonIgnore]
         public virtual FishKoi FishKoi { get; set; }
-
-        [ForeignKey("RefereeId")]
+        [JsonIgnore]
         public virtual Referee Referee { get; set; }
-
-        [ForeignKey("MatchId")]
+        [JsonIgnore]
         public virtual CompetitionMatch CompetitionMatch { get; set; }
 
     }

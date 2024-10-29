@@ -1,4 +1,4 @@
-using KoiBet.DTO.CompetitionMatch;
+using KoiBet.DTO;
 using KoiBet.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,6 +37,12 @@ public class CompetitionMatchController : ControllerBase
     public async Task<IActionResult> UpdateCompetitionMatch(string matchId, [FromBody] UpdateCompetitionMatchDTO _updateCompetitionMatch)
     {
         return await _competitionMatch.HandleUpdateMatch(matchId, _updateCompetitionMatch);
+    }
+
+    [HttpPost("Processing Match")]
+    public async Task<IActionResult> ProcessingMatch([FromBody] ProcessingMatchDTO processingMatchDto)
+    {
+        return await _competitionMatch.HandleProcessingMatch(processingMatchDto);
     }
 
     [HttpDelete("Delete CompetitionMatch")]

@@ -20,14 +20,10 @@ namespace KoiBet.Entities
         public string user_id { get; set; }
 
         // Thiết lập mối quan hệ với người dùng (Users)
-        [ForeignKey("UsersId")]
+        [ForeignKey("user_id")]
         public virtual Users User { get; set; }
 
-        public string? score_id { get; set; }
-
         public virtual ICollection<KoiScore> Scores { get; set; }
-
-        public string? competition_id { get; set; }
 
         public virtual ICollection<CompetitionKoi> Competitions { get; set; }
     }

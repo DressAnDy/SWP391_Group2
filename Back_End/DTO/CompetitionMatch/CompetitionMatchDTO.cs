@@ -1,6 +1,6 @@
 ﻿using KoiBet.DTO.CompetitionRound;
 
-namespace KoiBet.DTO.CompetitionMatch
+namespace KoiBet.DTO
 {
     public class CompetitionMatchDTO
     {
@@ -28,5 +28,10 @@ namespace KoiBet.DTO.CompetitionMatch
         public string RoundId { get; set; }
         public string FishkoiId_2 { get; set; }
         public string Result { get; set; }
+    }
+
+    public class ProcessingMatchDTO
+    {
+        public string MatchId { get; set; }
     }
 }
