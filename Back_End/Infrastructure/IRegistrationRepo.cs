@@ -31,7 +31,7 @@ public class RegistrationRepo : IRegistrationRepo
 
         var match = new CompetitionMatch 
         {
-            match_id = roundId + "_MATCH_" + matchCount + 1,
+            match_id = roundId + "_MATCH_" + (matchCount + 1),
             round_id = roundId,
             result = "Pending",
             first_koiId1 = firstKoi.koi_id,

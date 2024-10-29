@@ -139,24 +139,42 @@ namespace KoiBet.Service
         {
             try
             {
-                var match = await _context.CompetitionMatch
-                    .FirstOrDefaultAsync(m => m.match_id == processingMatchDto.MatchId);
+                var matchList = _context.CompetitionMatch
+                    .Include(c => c.Round)
+                    .Where(m => m.round_id == processingMatchDto.RoundId)
+                    .ToList();
 
-                if (match == null)
+                List<string> id = matchList[0].match_id.Split('_').ToList();
+                var newId = id[0] + "_" + id[1] + "_" + id[2] + "_" + (int.Parse(id[3]) + 1);
+
+                var koiList = new List<string>();
+
+                for(int i = 0; i < matchList.Count; i++)
                 {
-                    return NotFound("Match not found!");
+                    var processKoi = matchList[i].result.Split('_')[0];
+                    koiList.Add(processKoi);
                 }
 
-                _context.CompetitionMatch.Update(match);
-
-                var result = await _context.SaveChangesAsync();
-
-                if (result != 1)
+                for(int i = 0; i < koiList.Count; i++)
                 {
-                    return BadRequest("Failed to update match!");
-                }
+                    if(i % 2 == 0)
+                    {
+                        var processMatch = new CompetitionMatch
+                        {
+                            round_id = newId,
+                            first_koiId1 = koiList[i],
+                            first_koiId2 = koiList[i + 1],
+                            match_id = newId + "_MATCH_" + (i + 1),  
+                            result = "Pending"
+                        };
 
-                return Ok(match);
+                        _context.CompetitionMatch.Add(processMatch);
+                    }
+                }
+                
+                await _context.SaveChangesAsync();
+
+                return Ok("successful");
             }
             catch (Exception ex)
             {
