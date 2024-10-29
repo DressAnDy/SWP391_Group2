@@ -9,12 +9,12 @@ namespace KoiBet.Entities
         [Key]
         public string match_id { get; set; } = string.Empty;
 
-        public string first_koi { get; set; } = string.Empty;
+        public string first_koiId1 { get; set; } = string.Empty;
 
         [ForeignKey("CompetitionRound")]
         public string round_id { get; set; } = string.Empty;
 
-        public string second_koi { get; set; } = string.Empty;
+        public string first_koiId2 { get; set; } = string.Empty;
 
         public string result { get; set; } = string.Empty;
 

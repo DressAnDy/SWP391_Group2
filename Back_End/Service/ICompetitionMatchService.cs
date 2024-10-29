@@ -33,9 +33,9 @@ namespace KoiBet.Service
                     .Select(match => new CompetitionMatchDTO
                     {
                         MatchId = match.match_id,
-                        FirstKoi = match.first_koi,
+                        FishkoiId_1 = match.first_koiId1,
                         RoundId = match.round_id,
-                        SecondKoi = match.second_koi,
+                        FishkoiId_2 = match.first_koiId2,
                         Result = match.result
                     })
                     .ToListAsync();
@@ -77,9 +77,9 @@ namespace KoiBet.Service
                 var newMatch = new CompetitionMatch
                 {
                     match_id = $"Match_{newMatchNumber}",
-                    first_koi = createMatchDto.FirstKoi,
+                    first_koiId1 = createMatchDto.FishkoiId_1,
                     round_id = createMatchDto.RoundId,
-                    second_koi = createMatchDto.SecondKoi,
+                    first_koiId2 = createMatchDto.FishkoiId_2,
                     result = createMatchDto.Result
                 };
 
@@ -112,9 +112,9 @@ namespace KoiBet.Service
                     return NotFound("Match not found!");
                 }
 
-                match.first_koi = updateMatchDto.FirstKoi;
+                match.first_koiId1 = updateMatchDto.FishkoiId_1;
                 match.round_id = updateMatchDto.RoundId;
-                match.second_koi = updateMatchDto.SecondKoi;
+                match.first_koiId2 = updateMatchDto.FishkoiId_2;
                 match.result = updateMatchDto.Result;
 
                 _context.CompetitionMatch.Update(match);
@@ -171,9 +171,9 @@ namespace KoiBet.Service
                     .Select(m => new CompetitionMatchDTO
                     {
                         MatchId = m.match_id,
-                        FirstKoi = m.first_koi,
+                        FishkoiId_1 = m.first_koiId1,
                         RoundId = m.round_id,
-                        SecondKoi = m.second_koi,
+                        FishkoiId_2 = m.first_koiId2,
                         Result = m.result
                     })
                     .FirstOrDefaultAsync(m => m.MatchId == matchId);

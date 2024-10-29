@@ -17,7 +17,7 @@ namespace Service.ICompetitionService
     {
         Task<IActionResult> HandleGetAllCompetitions();
         Task<IActionResult> HandleCreateNewCompetition(CreateCompetitionDTO createCompetitionDto);
-        Task<IActionResult> HandleUpdateCompetition(string CompetitionId, UpdateCompetitionDTO updateCompetitionDto);
+        Task<IActionResult> HandleUpdateCompetition(UpdateCompetitionDTO updateCompetitionDto);
         Task<IActionResult> HandleDeleteCompetition(string competitionId);
         Task<IActionResult> HandleGetCompetition(string competitionId);
     }
@@ -187,7 +187,7 @@ namespace Service.ICompetitionService
         }
 
         // Update an existing Competition
-        public async Task<IActionResult> HandleUpdateCompetition(string CompetitionId, UpdateCompetitionDTO updateCompetitionDto)
+        public async Task<IActionResult> HandleUpdateCompetition(UpdateCompetitionDTO updateCompetitionDto)
         {
             try
             {
@@ -213,9 +213,44 @@ namespace Service.ICompetitionService
                 competition.number_attendees = updateCompetitionDto.number_attendees;
 
                 _context.CompetitionKoi.Update(competition);
+
+                if(competition.status_competition == "Active")
+                {
+                    for (int i = 0; i < competition.rounds; i++)
+                    {
+                        var round = new CompetitionRound
+                        {
+                            RoundId = updateCompetitionDto.CompetitionId + "_" + "RND_" + i,
+                            Match = 2,
+                            competition_id = updateCompetitionDto.CompetitionId
+                        };
+
+                        //var match_1 = new CompetitionMatch
+                        //{
+                        //    match_id = BCrypt.Net.BCrypt.HashPassword(id).Substring(0, 30),
+                        //    first_koiId1 = "TEMP_1",
+                        //    first_koiId2 = "TEMP_2",
+                        //    round_id = round.RoundId,
+                        //    result = "Pending"
+                        //};
+
+                        //var match_2 = new CompetitionMatch
+                        //{
+                        //    match_id = BCrypt.Net.BCrypt.HashPassword(id).Substring(0, 30),
+                        //    first_koiId1 = "TEMP_1",
+                        //    first_koiId2 = "TEMP_2",
+                        //    round_id = round.RoundId,
+                        //    result = "Pending"
+                        //};
+
+                        _context.CompetitionRound.Add(round);
+                        //_context.CompetitionMatch.Add(match_1);
+                        //_context.CompetitionMatch.Add(match_2);
+                    }
+                }
                 var result = await _context.SaveChangesAsync();
 
-                if (result != 1)
+                if (result == 0)
                 {
                     return BadRequest("Failed to update competition!");
                 }

@@ -37,7 +37,7 @@ namespace KoiBet.Entities
         public string award_id { get; set; }
 
         [JsonPropertyName("rounds")]
-        public string rounds { get; set; }
+        public int rounds { get; set; }
 
         public string competition_img { get; set; }
 

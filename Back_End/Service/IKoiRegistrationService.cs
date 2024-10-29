@@ -168,6 +168,7 @@ namespace KoiBet.Service
 
                 // Kiểm tra registration tồn tại
                 var registration = await _context.KoiRegistration
+                    .Include(c => c.FishKoi)
                     .FirstOrDefaultAsync(r => r.RegistrationId == updateKoiRegistrationDto.RegistrationId);
 
                 if (registration == null)
@@ -204,16 +205,30 @@ namespace KoiBet.Service
 
                 // Cập nhật vào database
                 _context.KoiRegistration.Update(registration);
+
+                if(registration.StatusRegistration == "Accepted")
+                {
+                    var user = _context.Users
+                        .FirstOrDefault(c => c.user_id == registration.FishKoi.users_id);
+
+                    if(registration.RegistrationFee > user.Balance)
+                    {
+                        return BadRequest("Not enough Money!");
+                    }
+
+                    user.Balance = user.Balance - registration.RegistrationFee;
+                    _context.Users.Update(user);
+                }
                 
                 var result = await _context.SaveChangesAsync();
 
-                if (result != 1)
+                if (result == 0)
                 {
                     _logger.LogError("Failed to update registration in database");
                     return BadRequest("Failed to update koi registration!");
                 }
 
-                return Ok(registration);
+                return Ok("Update Successful!");
             }
             catch (Exception ex)
             {
