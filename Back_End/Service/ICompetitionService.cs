@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using KoiBet.DTO.Competition;
 using KoiBet.Service;
 using KoiBet.DTO;
-using KoiBet.DTO.Referee;
 using System.ComponentModel.Design;
 using Service.KoiFishService;
 using DTO;
@@ -63,64 +62,15 @@ namespace Service.ICompetitionService
                         award_id = competition.award_id,
                         CompetitionImg = competition.competition_img,
                         number_attendees = competition.number_attendees,
+                        Award = competition.Award,
+                        Referee = competition.Referee,
+                        KoiRegistrations = competition.KoiRegistrations.ToList()
                     })
                     .ToListAsync();
 
                 if (!competitions.Any())
                 {
                     return NotFound("No competitions found!");
-                }
-
-                // Loop through each competition to get additional information for Koi, Referee, and Award
-                foreach (var competition in competitions)
-                {
-                    // Get Koi Category based on category_id
-                    if (!string.IsNullOrEmpty(competition.category_id?.ToString()))
-                    {
-                        var categoryResult = await _koiCategoryService.HandleGetKoiCategory(competition.category_id.ToString()) as OkObjectResult;
-                        if (categoryResult?.Value is KoiCategoryDTO category)
-                        {
-                            competition.KoiCategory = category;
-                        }
-                    }
-
-                    // Get KoiFish information based on koi_id
-                    if (!string.IsNullOrEmpty(competition.koi_id?.ToString()))
-                    {
-                        var koiResult = await _koiService.HandleGetKoiFishById(new SearchKoiDTO { koi_id = competition.koi_id.ToString() }) as OkObjectResult;
-
-                        if (koiResult?.Value is KoiFishDTO koi)
-                        {
-                            competition.KoiFish = koi;
-                        }
-                    }
-
-                    // Get Referee information based on referee_id
-                    if (!string.IsNullOrEmpty(competition.referee_id?.ToString()))
-                    {
-                        var refereeResult = await _refereeService.HandleGetReferee(competition.referee_id.ToString()) as OkObjectResult;
-                        if (refereeResult?.Value is RefereeDTO referee)
-                        {
-                            competition.Referee = referee;
-                        }
-                    }
-
-                    // Get Award information based on award_id
-                    if (!string.IsNullOrEmpty(competition.award_id?.ToString()))
-                    {
-                        var awardResult = await _awardService.HandleGetAwardById(competition.award_id.ToString()) as OkObjectResult;
-                        if (awardResult?.Value is AwardDTO award)
-                        {
-                            competition.Award = award;
-                        }
-                    }
-
-                    //// Get KoiRegistration information based on koi_id
-                    //var KoiRegistrations = _context.KoiRegistration
-                    //    .Where(c => c.competition_id == competition.CompetitionId)
-                    //    .ToList();
-
-                    //competition.KoiRegistrations = KoiRegistrations;
                 }
 
                 return Ok(competitions);
@@ -307,6 +257,10 @@ namespace Service.ICompetitionService
                         award_id = c.award_id,
                         CompetitionImg = c.competition_img,
                         number_attendees = c.number_attendees,
+                        KoiRegistrations = c.KoiRegistrations.ToList(),
+                        Award = c.Award,
+                        Referee = c.Referee,
+                        KoiCategory = c.Category
                     })
                     .FirstOrDefaultAsync(c => c.CompetitionId == competitionId);
 

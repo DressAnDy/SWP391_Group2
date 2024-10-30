@@ -1,6 +1,6 @@
 ﻿using KoiBet.DTO.User;
 
-namespace KoiBet.DTO.Referee
+namespace KoiBet.DTO
 {
     public class RefereeDTO
     {

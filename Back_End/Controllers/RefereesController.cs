@@ -1,4 +1,4 @@
-﻿using KoiBet.DTO.Referee;
+﻿using KoiBet.DTO;
 using KoiBet.Service;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,7 +1,5 @@
 ﻿using KoiBet.DTO;
 using DTO;
-using KoiBet.DTO.Referee;
-using KoiBet.DTO;
 using System.ComponentModel.DataAnnotations;
 using KoiBet.Entities;
 
@@ -28,13 +26,13 @@ namespace KoiBet.DTO.Competition
         public string? award_id { get; set; }
         public int number_attendees { get; set; }
 
-        public KoiCategoryDTO? KoiCategory { get; set; }
+        public KoiCategory? KoiCategory { get; set; }
 
         public KoiFishDTO? KoiFish { get; set; }
 
-        public RefereeDTO? Referee { get; set; }
+        public Referee? Referee { get; set; }
 
-        public AwardDTO? Award { get; set; }
+        public Award? Award { get; set; }
         public List<KoiRegistration>? KoiRegistrations { get; set; }
 
         public string? CompetitionImg { get; set; }
