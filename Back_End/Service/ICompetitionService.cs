@@ -64,7 +64,8 @@ namespace Service.ICompetitionService
                         number_attendees = competition.number_attendees,
                         Award = competition.Award,
                         Referee = competition.Referee,
-                        KoiRegistrations = competition.KoiRegistrations.ToList()
+                        KoiRegistrations = competition.KoiRegistrations.ToList(),
+                        KoiCategory = competition.Category,
                     })
                     .ToListAsync();
 
