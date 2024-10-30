@@ -1,6 +1,7 @@
 ﻿using DTO;
 using KoiBet.DTO.Competition;
 using KoiBet.DTO;
+using KoiBet.Entities;
 
 namespace KoiBet.DTO
 {
@@ -16,10 +17,11 @@ namespace KoiBet.DTO
         public DateTime? EndDates { get; set; }         // Ngày kết thúc
         public decimal RegistrationFee { get; set; }    // Phí đăng ký
 
-        public CompetitionKoiDTO competition {  get; set; }
+        public CompetitionKoi competition {  get; set; }
 
-        public KoiCategoryDTO koicategory { get; set; }
+        public KoiCategory koicategory { get; set; }
 
-        public KoiFishDTO koiFish { get; set; }
+        public FishKoi koiFish { get; set; }
+        public Users User {  get; set; }
     }
 }

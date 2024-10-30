@@ -57,39 +57,15 @@ namespace KoiBet.Service
                         SlotRegistration = reg.SlotRegistration,
                         StartDates = reg.StartDates,
                         EndDates = reg.EndDates,
-                        RegistrationFee = reg.RegistrationFee
+                        RegistrationFee = reg.RegistrationFee,
+                        koiFish = reg.FishKoi,
+                        User = reg.FishKoi.User,
+                        competition = reg.CompetitionKoi,
+                        koicategory = reg.KoiCategory,
                     })
                     .ToListAsync();
 
-                foreach(var registration in registrations)
-                {
-                    if (!string.IsNullOrEmpty(registration.CompetitionId))
-                    {
-                        var competitionResult = await _competitionService.HandleGetCompetition(registration.CompetitionId) as OkObjectResult;
-                        if(competitionResult?.Value is CompetitionKoiDTO competition)
-                        {
-                            registration.competition = competition;
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(registration.CategoryId))
-                    {
-                        var koicategoryResult = await _koiCategoryService.HandleGetKoiCategory(registration.CategoryId) as OkObjectResult;
-                        if(koicategoryResult?.Value is KoiCategoryDTO koiCategory)
-                        {
-                            registration.koicategory = koiCategory;
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(registration.KoiId))
-                    {
-                        var fishkoiResult = await _koiService.HandleGetKoiFishById(new SearchKoiDTO { koi_id = registration.KoiId.ToString() }) as OkObjectResult;
-                        if(fishkoiResult?.Value is KoiFishDTO koiFish)
-                        {
-                            registration.koiFish = koiFish;
-                        }
-                    }
-                }
+                
 
 
                 if (!registrations.Any())
@@ -296,7 +272,11 @@ namespace KoiBet.Service
                         SlotRegistration = r.SlotRegistration,
                         StartDates = r.StartDates,
                         EndDates = r.EndDates,
-                        RegistrationFee = r.RegistrationFee
+                        RegistrationFee = r.RegistrationFee,
+                        koiFish = r.FishKoi,
+                        User = r.FishKoi.User,
+                        competition = r.CompetitionKoi,
+                        koicategory = r.KoiCategory,
                     })
                     .FirstOrDefaultAsync(r => r.RegistrationId == registrationId);
 
@@ -330,7 +310,11 @@ namespace KoiBet.Service
                         SlotRegistration = r.SlotRegistration,
                         StartDates = r.StartDates,
                         EndDates = r.EndDates,
-                        RegistrationFee = r.RegistrationFee
+                        RegistrationFee = r.RegistrationFee,
+                        koiFish = r.FishKoi,
+                        User = r.FishKoi.User,
+                        competition = r.CompetitionKoi,
+                        koicategory = r.KoiCategory,
                     })
                     .FirstOrDefaultAsync(r => r.KoiId == koiId);
 
@@ -364,7 +348,11 @@ namespace KoiBet.Service
                         SlotRegistration = r.SlotRegistration,
                         StartDates = r.StartDates,
                         EndDates = r.EndDates,
-                        RegistrationFee = r.RegistrationFee
+                        RegistrationFee = r.RegistrationFee,
+                        koiFish = r.FishKoi,
+                        User = r.FishKoi.User,
+                        competition = r.CompetitionKoi,
+                        koicategory = r.KoiCategory,
                     })
                     .FirstOrDefaultAsync(r => r.CompetitionId == competitionId);
 
