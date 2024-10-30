@@ -239,13 +239,7 @@ namespace KoiBet.Service
                     }
                 }
                 
-                var result = await _context.SaveChangesAsync();
-
-                if (result != 0)
-                {
-                    _logger.LogError("Failed to update registration in database");
-                    return BadRequest("Failed to update koi registration!");
-                }
+                await _context.SaveChangesAsync();
 
                 return Ok("Update Successful!");
             }

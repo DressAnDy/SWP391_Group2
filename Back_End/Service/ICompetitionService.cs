@@ -214,28 +214,28 @@ namespace Service.ICompetitionService
 
                 if(competition.status_competition == "Active")
                 {
-                    if(competition.rounds != updateCompetitionDto.Round)
-                    {
-                        var oldRound = _context.CompetitionRound
+                    var oldRound = _context.CompetitionRound
                             .Where(c => c.competition_id == competition.competition_id)
                             .ToList();
 
+                    if(oldRound.Count != 0)
+                    {
                         _context.CompetitionRound
                             .RemoveRange(oldRound);
                         await _context.SaveChangesAsync();
+                    }
 
-                        for (int i = 1; i <= int.Parse(updateCompetitionDto.Round); i++)
+                    for (int i = 1; i <= int.Parse(updateCompetitionDto.Round); i++)
+                    {
+                        var count = (int.Parse(updateCompetitionDto.Round) - i).ToString();
+                        var round = new CompetitionRound
                         {
-                            var count = (int.Parse(updateCompetitionDto.Round) - i).ToString();
-                            var round = new CompetitionRound
-                            {
-                                RoundId = updateCompetitionDto.CompetitionId + "_RND_" + i,
-                                Match = (int)Math.Pow(2, Double.Parse(count)),
-                                competition_id = competition.competition_id
-                            };
+                            RoundId = updateCompetitionDto.CompetitionId + "_RND_" + i,
+                            Match = (int)Math.Pow(2, Double.Parse(count)),
+                            competition_id = competition.competition_id
+                        };
 
-                            _context.CompetitionRound.Add(round);
-                        }
+                        _context.CompetitionRound.Add(round);
                     }
                 }
 
