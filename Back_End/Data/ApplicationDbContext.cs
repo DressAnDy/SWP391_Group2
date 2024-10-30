@@ -21,7 +21,7 @@ namespace KoiBet.Data
         public DbSet<CompetitionRound> CompetitionRound { get; set; }
         public DbSet<CompetitionMatch> CompetitionMatch { get; set; }
         public DbSet<KoiScore> KoiScore { get; set; }
-        public DbSet<BetKoi> BetKois { get; set; }
+        public DbSet<BetKoi> KoiBet { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

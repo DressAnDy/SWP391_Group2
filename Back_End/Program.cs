@@ -13,6 +13,7 @@ using KoiBet.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using KoiBet.Service;
+using Service.IBetKoiService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -109,6 +110,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRefereeService, RefereeService>();
 builder.Services.AddScoped<IAwardService, AwardService>();
 builder.Services.AddScoped<IKoiRegistrationService, KoiRegistrationService>();
+builder.Services.AddScoped<IBetKoiService, KoiBetService>();
 builder.Services.AddScoped(provider => new Lazy<ICompetitionService>(() => provider.GetRequiredService<ICompetitionService>()));
 
 var app = builder.Build();

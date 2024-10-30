@@ -15,14 +15,14 @@ namespace KoiBet.Entities
         public string users_id { get; set; } = string.Empty;
 
         [Required]
-        [Column("registraion_id")]
+        [Column("registration_id")]
         public string registration_id { get; set; } = string.Empty;
 
         [Required]
         [Column("competition_id")]
         public string competition_id { get; set; } = string.Empty;
 
-        public string bet_amount { get; set; }
+        public decimal bet_amount { get; set; }
 
         [JsonIgnore]
         public virtual Users User { get; set; }

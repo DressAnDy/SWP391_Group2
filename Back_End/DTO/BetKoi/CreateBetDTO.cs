@@ -2,8 +2,11 @@ namespace KoiBet.DTO.Bet
 {
     public class CreateBetDTO
     {
-        public string UserId { get; set; }
-        public string KoiFishId { get; set; }
-        public decimal Amount { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        
+        public string RegistrationId { get; set; } = string.Empty;
+        
+        public string CompetitionId { get; set; } = string.Empty;
+        public decimal BetAmount { get; set; }
     }
 }
