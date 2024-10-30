@@ -33,6 +33,8 @@ namespace KoiBet.DTO.Competition
         public Referee? Referee { get; set; }
 
         public Award? Award { get; set; }
+
+        public KoiStandard? KoiStandard { get; set; }
         public List<KoiRegistration>? KoiRegistrations { get; set; }
 
         public string? CompetitionImg { get; set; }

@@ -1,5 +1,5 @@
 ﻿using DTO;
-using KoiBet.DTO.KoiStandard;
+using KoiBet.DTO;
 using KoiBet.Entities;
 
 namespace KoiBet.DTO

@@ -1,4 +1,4 @@
-﻿namespace KoiBet.DTO.KoiStandard
+﻿namespace KoiBet.DTO
 {
     public class KoiStandardDTO
     {

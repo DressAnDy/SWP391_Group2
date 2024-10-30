@@ -3,7 +3,7 @@ using KoiBet.Data;
 using KoiBet.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using KoiBet.DTO.KoiStandard;
+using KoiBet.DTO;
 
 namespace Service.KoiStandardService
 {

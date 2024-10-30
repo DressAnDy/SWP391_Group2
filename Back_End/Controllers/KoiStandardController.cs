@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using KoiBet.DTO.KoiStandard;
+using KoiBet.DTO;
 using Service.KoiStandardService;
 
 namespace KoiBet.Controllers

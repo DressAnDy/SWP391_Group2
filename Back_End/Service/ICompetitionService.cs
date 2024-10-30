@@ -66,6 +66,7 @@ namespace Service.ICompetitionService
                         Referee = competition.Referee,
                         KoiRegistrations = competition.KoiRegistrations.ToList(),
                         KoiCategory = competition.Category,
+                        KoiStandard = competition.Category.KoiStandard,
                     })
                     .ToListAsync();
 
@@ -261,7 +262,8 @@ namespace Service.ICompetitionService
                         KoiRegistrations = c.KoiRegistrations.ToList(),
                         Award = c.Award,
                         Referee = c.Referee,
-                        KoiCategory = c.Category
+                        KoiCategory = c.Category,
+                        KoiStandard = c.Category.KoiStandard,
                     })
                     .FirstOrDefaultAsync(c => c.CompetitionId == competitionId);
 
