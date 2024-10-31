@@ -48,7 +48,7 @@ namespace Service.ICompetitionService
             {
                 var competitions = await _context.CompetitionKoi
                     .Include(c => c.Award)
-                    .Include(c => c.Referee)
+                    .Include(c => c.Referee).ThenInclude(cs => cs.User)
                     .Include(c => c.Category).ThenInclude(cs => cs.KoiStandard)
                     .Include(c => c.KoiRegistrations).ThenInclude(cs => cs.FishKoi)
                     .ToListAsync();
@@ -249,7 +249,7 @@ namespace Service.ICompetitionService
             {
                 var competition = await _context.CompetitionKoi
                     .Include(c => c.Award)
-                    .Include(c => c.Referee)
+                    .Include(c => c.Referee).ThenInclude(cs => cs.User)
                     .Include(c => c.Category).ThenInclude(cs => cs.KoiStandard)
                     .Include(c => c.KoiRegistrations).ThenInclude(cs => cs.FishKoi)
                     .FirstOrDefaultAsync(d => d.competition_id == competitionId);

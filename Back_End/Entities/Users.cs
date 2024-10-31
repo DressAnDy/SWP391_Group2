@@ -45,5 +45,6 @@ public class Users
     public virtual List<FishKoi> FishKoi { get; set; } = new List<FishKoi>();
 
     public ICollection<Transactions> Transactions { get; set; } = new List<Transactions>();
+    [JsonIgnore]
     public ICollection<Referee> Referees { get; set; } = new List<Referee>();
 }
