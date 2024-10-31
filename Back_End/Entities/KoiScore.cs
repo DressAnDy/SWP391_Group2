@@ -28,9 +28,7 @@ namespace KoiBet.Entities
         public decimal score_koi { get; set; }
 
         // Navigation properties
-        [JsonIgnore]
         public virtual FishKoi FishKoi { get; set; }
-        [JsonIgnore]
         public virtual Referee Referee { get; set; }
         [JsonIgnore]
         public virtual CompetitionMatch CompetitionMatch { get; set; }

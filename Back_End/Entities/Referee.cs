@@ -24,6 +24,7 @@ namespace KoiBet.Entities
         [ForeignKey("user_id")]
         public virtual Users User { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<KoiScore> Scores { get; set; }
 
         [JsonIgnore]

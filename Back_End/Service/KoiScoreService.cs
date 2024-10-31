@@ -10,6 +10,8 @@ namespace KoiBet.Service
     {
         Task<IActionResult> HandleGetAllKoiScore();
         Task<IActionResult> HandleCreateKoiScore(string refereeId, CreateKoiScoreDTO createKoiScoreDTO);
+        Task<IActionResult> HandleGetKoiScoreByRefereeId(string currentUserId, string competitionId);
+        Task<IActionResult> HandleGetKoiScoreByKoiId(string koiId);
         //Task<IActionResult> HandleUpdateKoiScore(string refereeId, UpdateKoiScoreDTO updateKoiScoreDTO);
         //Task<IActionResult> HandleDeleteKoiScore(string koiScoreId);
         //Task<IActionResult> HandleGetKoiScoreById(string koiScoreId);
@@ -37,6 +39,7 @@ namespace KoiBet.Service
                         referee_id = score.referee_id,
                         match_id = score.match_id,
                         score_koi = score.score_koi,
+                        FishKoi = score.FishKoi,
                     })
                     .ToListAsync();
 
@@ -46,6 +49,52 @@ namespace KoiBet.Service
                 }
 
                 return Ok(scores);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving matches: {ex.Message}");
+            }
+        }
+
+        public async Task<IActionResult> HandleGetKoiScoreByRefereeId(string currentUserId, string competitionId)
+        {
+            try
+            {
+                var scores = _context.KoiScore
+                    .Include(c => c.FishKoi)
+                    .Include(c => c.Referee)
+                    .Where(c => c.Referee.user_id == currentUserId)
+                    .Where(c => c.match_id.Contains(competitionId))
+                    .ToList();
+
+                if (!scores.Any())
+                {
+                    return NotFound("No scores found!");
+                }
+
+                return Ok(scores);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving matches: {ex.Message}");
+            }
+        }
+
+        public async Task<IActionResult> HandleGetKoiScoreByKoiId(string koiId)
+        {
+            try
+            {
+                var score = _context.KoiScore
+                    .Include(c => c.FishKoi)
+                    .Where(c => c.koi_id == koiId)
+                    .ToList();
+
+                if (score == null)
+                {
+                    return NotFound("No scores found!");
+                }
+
+                return Ok(score);
             }
             catch (Exception ex)
             {

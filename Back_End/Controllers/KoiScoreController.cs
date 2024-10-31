@@ -23,11 +23,28 @@ public class KoiScoreController : ControllerBase
         return await _koiScoreService.HandleGetAllKoiScore();
     }
 
-    //[HttpGet("Get Competition By Id")]
-    //public async Task<IActionResult> GetKoiScoreById(string koiScoreId)
-    //{
-    //    return await _koiScoreService.HandleGetKoiScoreById(koiScoreId);
-    //}
+    [HttpGet("Get KoiScore By KoiId")]
+    public async Task<IActionResult> GetKoiScoreByKoiId(string koiId)
+    {
+        return await _koiScoreService.HandleGetKoiScoreByKoiId(koiId);
+    }
+
+    [Authorize]
+    [HttpGet("Get KoiScore By RefereeId")]
+    public async Task<IActionResult> GetKoiScoreByRefereeId(string competitionId)
+    {
+        var currentUser = HttpContext.User;
+        var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+        var currentUserId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        // Ki?m tra quy?n truy c?p
+        if (currentUserRole != "referee")
+        {
+            return BadRequest(new { message = "Unauthorized!" });
+        }
+
+        return await _koiScoreService.HandleGetKoiScoreByRefereeId(currentUserId, competitionId);
+    }
 
     [Authorize]
     [HttpPost("Create KoiScore")]
