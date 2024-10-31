@@ -36,13 +36,29 @@ namespace Service.IBetKoiService
         {
             try
             {
+                // Lấy thông tin người dùng
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.user_id == createBetDto.UserId);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                // Kiểm tra số dư
+                if (user.Balance < createBetDto.BetAmount)
+                {
+                    return BadRequest("Insufficient balance.");
+                }
+
+                // Lấy ID cuối cùng và tăng lên cho ID mới
                 var lastBet = await _context.KoiBet
                     .OrderByDescending(b => b.bet_id)
                     .FirstOrDefaultAsync();
 
                 int newBetNumber = 1;
 
-                if (lastBet != null && lastBet.bet_id.StartsWith("bet_"))
+                if (lastBet != null && lastBet.bet_id.StartsWith("Bet_"))
                 {
                     int.TryParse(lastBet.bet_id.Substring(4), out newBetNumber);
                     newBetNumber++;
@@ -50,6 +66,7 @@ namespace Service.IBetKoiService
 
                 string newBetId = $"Bet_{newBetNumber}";
 
+                // Tạo đối tượng Bet mới
                 var bet = new BetKoi()
                 {
                     bet_id = newBetId,
@@ -59,6 +76,10 @@ namespace Service.IBetKoiService
                     bet_amount = createBetDto.BetAmount
                 };
 
+                // Trừ số tiền đặt cược từ số dư của người dùng
+                user.Balance -= createBetDto.BetAmount;
+
+                // Lưu thay đổi vào cơ sở dữ liệu
                 _context.KoiBet.Add(bet);
                 await _context.SaveChangesAsync();
 
