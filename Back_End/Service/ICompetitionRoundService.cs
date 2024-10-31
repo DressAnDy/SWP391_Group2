@@ -34,7 +34,9 @@ namespace KoiBet.Service
                     {
                         RoundId = round.RoundId,
                         Match = round.Match,
-                        CompetitionId = round.competition_id
+                        CompetitionId = round.competition_id,
+                        Matches = round.Matches,
+                        CompetitionKoi = round.CompetitionKoi,
                     })
                     .ToListAsync();
 
@@ -166,7 +168,9 @@ namespace KoiBet.Service
                     {
                         RoundId = r.RoundId,
                         Match = r.Match,
-                        CompetitionId = r.competition_id
+                        CompetitionId = r.competition_id,
+                        Matches = r.Matches,
+                        CompetitionKoi = r.CompetitionKoi,
                     })
                     .FirstOrDefaultAsync(r => r.RoundId == roundId);
 
