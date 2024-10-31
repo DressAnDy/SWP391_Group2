@@ -26,10 +26,13 @@ namespace KoiBet.Entities
         [Column("users_id")]
         public string users_id { get; set; } = string.Empty;
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual Users User { get; set; }
+        [JsonIgnore]
         public virtual ICollection<CompetitionKoi> Competitions { get; set; } = new List<CompetitionKoi>();
+        [JsonIgnore]
         public virtual ICollection<KoiScore> Scores { get; set; } = new List<KoiScore>();
+        [JsonIgnore]
         public virtual ICollection<KoiRegistration> KoiRegistrations { get; set; } = new List<KoiRegistration>();
     }
 }

@@ -47,32 +47,36 @@ namespace Service.ICompetitionService
             try
             {
                 var competitions = await _context.CompetitionKoi
-                    .Select(competition => new CompetitionKoiDTO
-                    {
-                        CompetitionId = competition.competition_id,
-                        CompetitionName = competition.competition_name,
-                        CompetitionDescription = competition.competition_description,
-                        StartTime = competition.start_time,
-                        EndTime = competition.end_time,
-                        StatusCompetition = competition.status_competition,
-                        Round = competition.rounds,
-                        category_id = competition.category_id,
-                        koi_id = competition.koi_id,
-                        referee_id = competition.referee_id,
-                        award_id = competition.award_id,
-                        CompetitionImg = competition.competition_img,
-                        number_attendees = competition.number_attendees,
-                        Award = competition.Award,
-                        Referee = competition.Referee,
-                        KoiRegistrations = competition.KoiRegistrations.ToList(),
-                        KoiCategory = competition.Category,
-                        KoiStandard = competition.Category.KoiStandard,
-                    })
+                    .Include(c => c.Award)
+                    .Include(c => c.Referee)
+                    .Include(c => c.Category).ThenInclude(cs => cs.KoiStandard)
+                    .Include(c => c.KoiRegistrations).ThenInclude(cs => cs.FishKoi)
                     .ToListAsync();
+                //.Select(competition => new CompetitionKoiDTO
+                //{
+                //    CompetitionId = competition.competition_id,
+                //    CompetitionName = competition.competition_name,
+                //    CompetitionDescription = competition.competition_description,
+                //    StartTime = competition.start_time,
+                //    EndTime = competition.end_time,
+                //    StatusCompetition = competition.status_competition,
+                //    Round = competition.rounds,
+                //    category_id = competition.category_id,
+                //    koi_id = competition.koi_id,
+                //    referee_id = competition.referee_id,
+                //    award_id = competition.award_id,
+                //    CompetitionImg = competition.competition_img,
+                //    number_attendees = competition.number_attendees,
+                //    Award = competition.Award,
+                //    Referee = competition.Referee,
+                //    //KoiRegistrations = competition.KoiRegistrations.ToList(),
+                //    KoiCategory = competition.Category,
+                //    KoiStandard = competition.Category.KoiStandard,
+                //})
 
-                if (!competitions.Any())
+                if (competitions.Any())
                 {
-                    return NotFound("No competitions found!");
+                    return BadRequest("No Competitions!");
                 }
 
                 return Ok(competitions);
@@ -244,28 +248,11 @@ namespace Service.ICompetitionService
             try
             {
                 var competition = await _context.CompetitionKoi
-                    .Select(c => new CompetitionKoiDTO
-                    {
-                        CompetitionId = c.competition_id,
-                        CompetitionName = c.competition_name,
-                        CompetitionDescription = c.competition_description,
-                        StartTime = c.start_time,
-                        EndTime = c.end_time,
-                        StatusCompetition = c.status_competition,
-                        Round = c.rounds,
-                        category_id = c.category_id,
-                        koi_id = c.koi_id,
-                        referee_id = c.referee_id,
-                        award_id = c.award_id,
-                        CompetitionImg = c.competition_img,
-                        number_attendees = c.number_attendees,
-                        KoiRegistrations = c.KoiRegistrations.ToList(),
-                        Award = c.Award,
-                        Referee = c.Referee,
-                        KoiCategory = c.Category,
-                        KoiStandard = c.Category.KoiStandard,
-                    })
-                    .FirstOrDefaultAsync(c => c.CompetitionId == competitionId);
+                    .Include(c => c.Award)
+                    .Include(c => c.Referee)
+                    .Include(c => c.Category).ThenInclude(cs => cs.KoiStandard)
+                    .Include(c => c.KoiRegistrations).ThenInclude(cs => cs.FishKoi)
+                    .FirstOrDefaultAsync(d => d.competition_id == competitionId);
 
                 if (competition == null)
                 {

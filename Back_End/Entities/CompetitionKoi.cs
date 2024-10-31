@@ -56,7 +56,7 @@ namespace KoiBet.Entities
         [JsonIgnore]
         public virtual Award Award { get; set; }
 
-        public virtual ICollection<KoiRegistration> KoiRegistrations { get; set; }
+        public virtual List<KoiRegistration> KoiRegistrations { get; set; }
         public virtual ICollection<BetKoi> Bets { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace KoiBet.Entities
 {
@@ -42,9 +43,11 @@ namespace KoiBet.Entities
         public virtual FishKoi FishKoi { get; set; }
 
         [ForeignKey("competition_id")]
+        [JsonIgnore]
         public virtual CompetitionKoi CompetitionKoi { get; set; }
 
         [ForeignKey("CategoryId")]
+        [JsonIgnore]
         public virtual KoiCategory KoiCategory { get; set; }
 
         public virtual ICollection<BetKoi> Bets { get; set; } = new List<BetKoi>();
