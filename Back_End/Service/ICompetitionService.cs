@@ -74,7 +74,7 @@ namespace Service.ICompetitionService
                 //    KoiStandard = competition.Category.KoiStandard,
                 //})
 
-                if (competitions.Any())
+                if (!competitions.Any())
                 {
                     return BadRequest("No Competitions!");
                 }

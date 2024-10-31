@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace KoiBet.Entities
 {
@@ -11,6 +12,7 @@ namespace KoiBet.Entities
 
         public int quantity {get; set; }
 
+        [JsonIgnore]
         public ICollection<CompetitionKoi> Competitions { get; set; }
     }
 }

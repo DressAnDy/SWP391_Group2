@@ -1,6 +1,7 @@
 ﻿using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace KoiBet.Entities
 {
@@ -25,6 +26,7 @@ namespace KoiBet.Entities
 
         public virtual ICollection<KoiScore> Scores { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<CompetitionKoi> Competitions { get; set; }
     }
 }

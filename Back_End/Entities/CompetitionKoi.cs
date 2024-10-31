@@ -44,16 +44,13 @@ namespace KoiBet.Entities
         [Column("number_attendees")]
         public int number_attendees { get; set; } 
 
-        [JsonIgnore]
         public virtual KoiCategory Category { get; set; }
 
         [JsonIgnore]
         public virtual FishKoi Koi { get; set; }
 
-        [JsonIgnore]
         public virtual Referee Referee { get; set; }
 
-        [JsonIgnore]
         public virtual Award Award { get; set; }
 
         public virtual List<KoiRegistration> KoiRegistrations { get; set; }
