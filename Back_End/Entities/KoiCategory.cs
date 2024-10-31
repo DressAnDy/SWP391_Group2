@@ -15,7 +15,7 @@ namespace KoiBet.Entities
         [Column("standard_id")]
         public string standard_id { get; set; }
 
-        [JsonIgnore]
+        
         public virtual KoiStandard KoiStandard { get; set; }
         [JsonIgnore]
         public virtual ICollection<CompetitionKoi> Competitions { get; set; }
