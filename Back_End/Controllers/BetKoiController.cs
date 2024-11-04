@@ -40,6 +40,13 @@ namespace KoiBet.Controllers
             return await _betKoiService.HandleGetBet(betId);
         }
 
+        [HttpGet("Get All Bet")]
+        public async Task<IActionResult> GetAllBet()
+        {
+            return await _betKoiService.HandleGetAllBet();
+        }
+
+
         [HttpGet("Get User Bets")]
         public async Task<IActionResult> GetUserBets(string userId)
         {

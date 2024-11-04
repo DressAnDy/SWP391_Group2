@@ -21,5 +21,7 @@ namespace KoiBet.DTO.BetKoi
         public decimal bet_amount { get; set; }
 
         public CompetitionKoi? CompetitionKoi { get; set; } 
+
+        public KoiRegistration? KoiRegistration { get; set; }
     }
 }
