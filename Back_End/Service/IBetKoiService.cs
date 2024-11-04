@@ -99,7 +99,16 @@
                 var userBets = await _context.KoiBet
                     .Include(b => b.Competition)
                     .Include(b => b.User)
+                    .Include(b => b.KoiRegistration)
                     .Where(b => b.users_id == userId)
+                    .Select(userBets => new
+                    {
+                        BetId = userBets.bet_id,
+                        UserId = userBets.User.user_id ?? string.Empty,
+                        Username = userBets.User.Username ?? string.Empty,
+                        CompetitionId = userBets.Competition.competition_id ?? string.Empty,
+                        RegistrationId = userBets.KoiRegistration.RegistrationId ?? string.Empty,
+                    })
                     .ToListAsync();
 
                 if (userBets == null || userBets.Count == 0)
@@ -116,6 +125,7 @@
                 var bet = await _context.KoiBet
                       .Include(b => b.Competition)
                       .Include(b => b.User)
+                      .Include(b => b.KoiRegistration)
                       .FirstOrDefaultAsync(b => b.bet_id == betId);
 
                 if (bet == null)
@@ -205,19 +215,18 @@
                                 competition_img = bet.Competition.competition_img ?? string.Empty,
                                 number_attendees = bet.Competition.number_attendees,
                             },
-                            RegistrationId = bet.KoiRegistration != null ? bet.KoiRegistration.RegistrationId : null,
                             KoiRegistration = bet.KoiRegistration == null ? null : new KoiRegistration
                             {
-                                RegistrationId = bet.KoiRegistration.RegistrationId,
-                                StatusRegistration = bet.KoiRegistration.StatusRegistration,
+                                RegistrationId = bet.KoiRegistration.RegistrationId ?? string.Empty,
+                                StatusRegistration = bet.KoiRegistration.StatusRegistration ?? string.Empty,
                                 SlotRegistration = bet.KoiRegistration.SlotRegistration,
                                 RegistrationFee = bet.KoiRegistration.RegistrationFee,
-                                koi_id = bet.KoiRegistration.koi_id,
-                                competition_id = bet.KoiRegistration.competition_id,
-                                CategoryId = bet.KoiRegistration.CategoryId
+                                koi_id = bet.KoiRegistration.koi_id ?? string.Empty,
+                                competition_id = bet.KoiRegistration.competition_id ?? string.Empty,
+                                CategoryId = bet.KoiRegistration.CategoryId ?? string.Empty
                             }
                         })
-                        .OrderByDescending(bet => bet.BetId) // Sửa lại ở đây
+                        .OrderByDescending(bet => bet.BetId)
                         .ToListAsync();
 
                     if (bets.Count == 0)
