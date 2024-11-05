@@ -31,13 +31,15 @@ namespace KoiBet.Service
             try
             {
                 var matches = await _context.CompetitionMatch
-                    .Select(match => new CompetitionMatchDTO
+                    .Select(match => new CompetitionMatch
                     {
-                        MatchId = match.match_id,
-                        FishkoiId_1 = match.first_koiId1,
-                        RoundId = match.round_id,
-                        FishkoiId_2 = match.first_koiId2,
-                        Result = match.result
+                        match_id = match.match_id,
+                        first_koiId1 = match.first_koiId1,
+                        first_koiId2 = match.first_koiId2,
+                        round_id = match.round_id,
+                        result = match.result,
+                        FirstKoi = match.FirstKoi,
+                        SecondKoi = match.SecondKoi,
                     })
                     .ToListAsync();
 
@@ -217,15 +219,17 @@ namespace KoiBet.Service
             try
             {
                 var match = await _context.CompetitionMatch
-                    .Select(m => new CompetitionMatchDTO
+                    .Select(match => new CompetitionMatch
                     {
-                        MatchId = m.match_id,
-                        FishkoiId_1 = m.first_koiId1,
-                        RoundId = m.round_id,
-                        FishkoiId_2 = m.first_koiId2,
-                        Result = m.result
+                        match_id = match.match_id,
+                        first_koiId1 = match.first_koiId1,
+                        first_koiId2 = match.first_koiId2,
+                        round_id = match.round_id,
+                        result = match.result,
+                        FirstKoi = match.FirstKoi,
+                        SecondKoi = match.SecondKoi,
                     })
-                    .FirstOrDefaultAsync(m => m.MatchId == matchId);
+                    .FirstOrDefaultAsync(m => m.match_id == matchId);
 
                 if (match == null)
                 {
