@@ -114,7 +114,7 @@ builder.Services.AddScoped<IBetKoiService, KoiBetService>();
 builder.Services.AddScoped(provider => new Lazy<ICompetitionService>(() => provider.GetRequiredService<ICompetitionService>()));
 
 var app = builder.Build();
-
+    
 // Cấu hình pipeline HTTP request
 if (app.Environment.IsDevelopment())
 {

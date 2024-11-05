@@ -10,15 +10,12 @@ namespace KoiBet.Entities
         [Key]
         public string bet_id { get; set; } = string.Empty;
 
-        [Required]
         [Column("users_id")]
         public string users_id { get; set; } = string.Empty;
 
-        [Required]
         [Column("registration_id")]
         public string registration_id { get; set; } = string.Empty;
 
-        [Required]
         [Column("competition_id")]
         public string competition_id { get; set; } = string.Empty;
 
