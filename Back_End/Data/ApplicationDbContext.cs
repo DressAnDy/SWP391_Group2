@@ -98,6 +98,16 @@ namespace KoiBet.Data
                 .WithMany(r => r.Matches)
                 .HasForeignKey(m => m.round_id);
 
+            modelBuilder.Entity<CompetitionMatch>()
+                .HasOne(m => m.FirstKoi)
+                .WithMany()
+                .HasForeignKey(m => m.first_koiId1);
+
+            modelBuilder.Entity<CompetitionMatch>()
+                .HasOne(m => m.SecondKoi)
+                .WithMany()
+                .HasForeignKey(m => m.first_koiId2);
+
             modelBuilder.Entity<KoiScore>()
                 .HasOne(s => s.FishKoi)
                 .WithMany(k => k.Scores)

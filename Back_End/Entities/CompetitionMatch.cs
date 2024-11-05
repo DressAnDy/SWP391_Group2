@@ -18,6 +18,9 @@ namespace KoiBet.Entities
 
         public string result { get; set; } = string.Empty;
 
+        public virtual FishKoi FirstKoi { get; set; }  
+        public virtual FishKoi SecondKoi { get; set; }
+
         [JsonIgnore]
         public virtual CompetitionRound Round { get; set; }
 

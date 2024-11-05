@@ -30,11 +30,11 @@ namespace KoiBet.Service
             try
             {
                 var rounds = await _context.CompetitionRound
-                    .Select(round => new CompetitionRoundDTO
+                    .Select(round => new CompetitionRound
                     {
                         RoundId = round.RoundId,
                         Match = round.Match,
-                        CompetitionId = round.competition_id,
+                        competition_id = round.competition_id,
                         Matches = round.Matches,
                         CompetitionKoi = round.CompetitionKoi,
                     })
