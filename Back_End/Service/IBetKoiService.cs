@@ -151,31 +151,66 @@
                 return Ok(userBets);
             }
 
-            // Lấy thông tin chi tiết của một cược
-            public async Task<IActionResult> HandleGetBet(string betId)
+        // Lấy thông tin chi tiết của một cược
+        public async Task<IActionResult> HandleGetBet(string betId)
+        {
+            try
             {
                 var bet = await _context.KoiBet
-                      .Include(b => b.Competition)
-                      .Include(b => b.User)
-                      .Include(b => b.KoiRegistration)
-                      .FirstOrDefaultAsync(b => b.bet_id == betId);
+                    .Include(b => b.User)
+                    .Include(b => b.Competition)
+                    .Include(b => b.KoiRegistration)
+                    .FirstOrDefaultAsync(b => b.bet_id == betId);
 
                 if (bet == null)
                 {
                     return NotFound("Bet not found.");
                 }
 
-                // Kiểm tra các thuộc tính của bet có giá trị null hay không
-                if (bet.Competition == null || bet.User == null)
+                var betDTO = new
                 {
-                    return NotFound("Associated data not found.");
-                }
+                    BetId = bet.bet_id,
+                    User = new
+                    {
+                        user_id = bet.User?.user_id ?? string.Empty,
+                        Username = bet.User?.Username ?? string.Empty,
+                        full_name = bet.User?.full_name ?? string.Empty,
+                        email = bet.User?.Email ?? string.Empty,
+                        phone = bet.User?.Phone ?? string.Empty,
+                        role_id = bet.User?.role_id ?? string.Empty,
+                        balance = bet.User?.Balance ?? 0
+                    },
+                    Competition = new
+                    {
+                        competition_id = bet.Competition?.competition_id ?? string.Empty,
+                        competition_name = bet.Competition?.competition_name ?? string.Empty,
+                        competition_description = bet.Competition?.competition_description ?? string.Empty,
+                        start_time = bet.Competition?.start_time ?? DateTime.MinValue,
+                        end_time = bet.Competition?.end_time ?? DateTime.MinValue,
+                        status_competition = bet.Competition?.status_competition ?? string.Empty,
+                        number_attendees = bet.Competition?.number_attendees ?? 0
+                    },
+                    KoiRegistration = new
+                    {
+                        registrationId = bet.KoiRegistration?.RegistrationId ?? string.Empty,
+                        koi_id = bet.KoiRegistration?.koi_id ?? string.Empty,
+                        competition_id = bet.KoiRegistration?.competition_id ?? string.Empty,
+                        statusRegistration = bet.KoiRegistration?.StatusRegistration ?? string.Empty,
+                        slotRegistration = bet.KoiRegistration?.SlotRegistration ?? 0,
+                        registrationFee = bet.KoiRegistration?.RegistrationFee ?? 0
+                    }
+                };
 
-                return Ok(bet);
+                return Ok(betDTO);
             }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving bet: {ex.Message}");
+            }
+        }
 
-            // Cập nhật cược
-            public async Task<IActionResult> HandleUpdateBet(UpdateBetDTO updateBetDto)
+        // Cập nhật cược
+        public async Task<IActionResult> HandleUpdateBet(UpdateBetDTO updateBetDto)
             {
                 var bet = await _context.KoiBet.FindAsync(updateBetDto.BetId);
                 if (bet == null)
