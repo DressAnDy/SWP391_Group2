@@ -56,6 +56,23 @@ namespace KoiBet.Controllers
             return await _userService.HandleGetUser(userId);
         }
 
+        // Get all users by role
+        [Authorize]
+        [HttpGet("GetAllUsersByRoleId")]
+        public async Task<IActionResult> GetAllUsersByRole([FromQuery] string roleId)
+        {
+            var currentUser = HttpContext.User;
+            var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+
+            // Ki?m tra quy?n truy c?p
+            if (currentUserRole != "admin" && currentUserRole != "manager")
+            {
+                return BadRequest(new { message = "Unauthorized!" });
+            }
+
+            return await _userService.HandleGetAllUsersByRole(roleId);
+        }
+
         // PUT: user/update-profile
         [Authorize]
         [HttpPut("update-profile")]

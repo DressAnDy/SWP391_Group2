@@ -18,6 +18,7 @@ namespace KoiBet.Service
         Task<IActionResult> HandleGetAllUser();
         Task<IActionResult> HandleUpdateUserRole(UpdateUserRoleDTO updateUserRoleDTO);
         Task<IActionResult> HandleChangePassword(string userId, PasswordChangeDTO passwordChangeDTO);
+        Task<IActionResult> HandleGetAllUsersByRole(string roleId);
     }
 
     public class UserService : ControllerBase, IUserService
@@ -146,6 +147,29 @@ namespace KoiBet.Service
             }
 
             return new OkObjectResult(result);
+        }
+
+        public async Task<IActionResult> HandleGetAllUsersByRole(string roleId)
+        {
+            try
+            {
+                var userList = _context.Users
+                    .Where(c => c.role_id == roleId.ToUpper())
+                    .OrderByDescending(c => c.Username)
+                    .ToList();
+
+                if (userList == null)
+                {
+                    return BadRequest("Không tìm thấy người dùng");
+                }
+
+                return new OkObjectResult(userList);
+            }
+            catch(Exception ex) {
+            {
+                return BadRequest($"Error deleting referee: {ex.Message}");
+            }
+        }
         }
 
         public async Task<IActionResult> HandleUpdateUserRole(UpdateUserRoleDTO updateUserRoleDTO)
