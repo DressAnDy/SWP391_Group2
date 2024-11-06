@@ -30,14 +30,20 @@ namespace KoiBet.Service
             try
             {
                 var rounds = await _context.CompetitionRound
-                    .Select(round => new CompetitionRound
-                    {
-                        RoundId = round.RoundId,
-                        Match = round.Match,
-                        competition_id = round.competition_id,
-                        Matches = round.Matches,
-                        CompetitionKoi = round.CompetitionKoi,
-                    })
+                    .Include(c => c.CompetitionKoi).ThenInclude(cs => cs.Category).ThenInclude(cb => cb.KoiStandard)
+                    .Include(c => c.CompetitionKoi).ThenInclude(cs => cs.Referee)
+                    .Include(c => c.CompetitionKoi).ThenInclude(cs => cs.Award)
+                    .Include(c => c.CompetitionKoi).ThenInclude(cs => cs.KoiRegistrations)
+                    .Include(c => c.Matches).ThenInclude(cs => cs.FirstKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.Matches).ThenInclude(cs => cs.SecondKoi).ThenInclude(cb => cb.User)
+                    //.Select(round => new CompetitionRound
+                    //{
+                    //    RoundId = round.RoundId,
+                    //    Match = round.Match,
+                    //    competition_id = round.competition_id,
+                    //    Matches = round.Matches,
+                    //    CompetitionKoi = round.CompetitionKoi,
+                    //})
                     .ToListAsync();
 
                 if (!rounds.Any())
@@ -164,14 +170,12 @@ namespace KoiBet.Service
             try
             {
                 var round = await _context.CompetitionRound
-                    .Select(r => new CompetitionRoundDTO
-                    {
-                        RoundId = r.RoundId,
-                        Match = r.Match,
-                        CompetitionId = r.competition_id,
-                        Matches = r.Matches,
-                        CompetitionKoi = r.CompetitionKoi,
-                    })
+                    .Include(c => c.CompetitionKoi).ThenInclude(cs => cs.Category).ThenInclude(cb => cb.KoiStandard)
+                    .Include(c => c.CompetitionKoi).ThenInclude(cs => cs.Referee)
+                    .Include(c => c.CompetitionKoi).ThenInclude(cs => cs.Award)
+                    .Include(c => c.CompetitionKoi).ThenInclude(cs => cs.KoiRegistrations)
+                    .Include(c => c.Matches).ThenInclude(cs => cs.FirstKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.Matches).ThenInclude(cs => cs.SecondKoi).ThenInclude(cb => cb.User)
                     .FirstOrDefaultAsync(r => r.RoundId == roundId);
 
                 if (round == null)

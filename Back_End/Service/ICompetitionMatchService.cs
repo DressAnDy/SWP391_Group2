@@ -31,16 +31,18 @@ namespace KoiBet.Service
             try
             {
                 var matches = await _context.CompetitionMatch
-                    .Select(match => new CompetitionMatch
-                    {
-                        match_id = match.match_id,
-                        first_koiId1 = match.first_koiId1,
-                        first_koiId2 = match.first_koiId2,
-                        round_id = match.round_id,
-                        result = match.result,
-                        FirstKoi = match.FirstKoi,
-                        SecondKoi = match.SecondKoi,
-                    })
+                    .Include(c => c.FirstKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.SecondKoi).ThenInclude(cb => cb.User)
+                    //.Select(match => new CompetitionMatch
+                    //{
+                    //    match_id = match.match_id,
+                    //    first_koiId1 = match.first_koiId1,
+                    //    first_koiId2 = match.first_koiId2,
+                    //    round_id = match.round_id,
+                    //    result = match.result,
+                    //    FirstKoi = match.FirstKoi,
+                    //    SecondKoi = match.SecondKoi,
+                    //})
                     .ToListAsync();
 
                 if (!matches.Any())
@@ -219,16 +221,8 @@ namespace KoiBet.Service
             try
             {
                 var match = await _context.CompetitionMatch
-                    .Select(match => new CompetitionMatch
-                    {
-                        match_id = match.match_id,
-                        first_koiId1 = match.first_koiId1,
-                        first_koiId2 = match.first_koiId2,
-                        round_id = match.round_id,
-                        result = match.result,
-                        FirstKoi = match.FirstKoi,
-                        SecondKoi = match.SecondKoi,
-                    })
+                    .Include(c => c.FirstKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.SecondKoi).ThenInclude(cb => cb.User)
                     .FirstOrDefaultAsync(m => m.match_id == matchId);
 
                 if (match == null)

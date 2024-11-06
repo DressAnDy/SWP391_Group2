@@ -36,7 +36,8 @@ namespace KoiBet.Service
                         RefereeId = referee.RefereeId,
                         RefereeName = referee.RefereeName,
                         ExpJudge = referee.ExpJudge,
-                        UserId = referee.user_id
+                        UserId = referee.user_id,
+                        user = referee.User,
                     })
                     .ToListAsync();
 
@@ -177,7 +178,8 @@ namespace KoiBet.Service
                         RefereeId = r.RefereeId,
                         RefereeName = r.RefereeName,
                         ExpJudge = r.ExpJudge,
-                        UserId = r.user_id
+                        UserId = r.user_id,
+                        user = r.User,
                     })
                     .FirstOrDefaultAsync(r => r.RefereeId == refereeId);
 

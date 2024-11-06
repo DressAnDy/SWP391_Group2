@@ -1,6 +1,8 @@
 ﻿using KoiBet.DTO;
 using KoiBet.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KoiBet.Controllers
 {
@@ -16,16 +18,36 @@ namespace KoiBet.Controllers
         }
 
         // Get all referees
+        [Authorize]
         [HttpPost("GetAllReferees")]
         public async Task<IActionResult> GetAllReferees()
         {
+            var currentUser = HttpContext.User;
+            var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+
+            // Ki?m tra quy?n truy c?p
+            if (currentUserRole != "admin" && currentUserRole != "manager")
+            {
+                return BadRequest(new { message = "Unauthorized!" });
+            }
+
             return await _refereeService.HandleGetAllReferees();
         }
 
         // Get a specific referee by ID
+        [Authorize]
         [HttpPost("GetReferee")]
         public async Task<IActionResult> GetReferee([FromBody] string refereeId)
         {
+            var currentUser = HttpContext.User;
+            var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+
+            // Ki?m tra quy?n truy c?p
+            if (currentUserRole != "admin" && currentUserRole != "manager")
+            {
+                return BadRequest(new { message = "Unauthorized!" });
+            }
+
             return await _refereeService.HandleGetReferee(refereeId);
         }
 

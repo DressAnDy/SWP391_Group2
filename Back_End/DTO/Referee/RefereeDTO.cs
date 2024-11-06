@@ -1,4 +1,5 @@
 ﻿using KoiBet.DTO.User;
+using KoiBet.Entities;
 
 namespace KoiBet.DTO
 {
@@ -11,6 +12,7 @@ namespace KoiBet.DTO
         public string ExpJudge { get; set; }
 
         public string UserId { get; set; }
+        public Users user { get; set; }
 
     }
 
