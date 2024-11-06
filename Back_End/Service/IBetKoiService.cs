@@ -104,10 +104,42 @@
                     .Select(userBets => new
                     {
                         BetId = userBets.bet_id,
-                        UserId = userBets.User.user_id ?? string.Empty,
-                        Username = userBets.User.Username ?? string.Empty,
-                        CompetitionId = userBets.Competition.competition_id ?? string.Empty,
-                        RegistrationId = userBets.KoiRegistration.RegistrationId ?? string.Empty,
+                        User = userBets.User == null ? null : new UserDTO
+                        {
+                            user_id = userBets.User.user_id ?? string.Empty,
+                            Username = userBets.User.Username ?? string.Empty,
+                            full_name = userBets.User.full_name ?? string.Empty,
+                            email = userBets.User.Email ?? string.Empty,
+                            phone = userBets.User.Phone ?? string.Empty,
+                            role_id = userBets.User.role_id ?? string.Empty,
+                            balance = userBets.User.Balance ?? 0
+                        },
+                        CompetitionKoi = userBets.Competition == null ? null : new CompetitionKoi
+                        {
+                            competition_id = userBets.Competition.competition_id,
+                            competition_name = userBets.Competition.competition_name ?? string.Empty,
+                            competition_description = userBets.Competition.competition_description ?? string.Empty,
+                            start_time = userBets.Competition.start_time,
+                            end_time = userBets.Competition.end_time,
+                            status_competition = userBets.Competition.status_competition ?? string.Empty,
+                            category_id = userBets.Competition.category_id ?? string.Empty,
+                            koi_id = userBets.Competition.koi_id ?? string.Empty,
+                            referee_id = userBets.Competition.referee_id ?? string.Empty,
+                            award_id = userBets.Competition.award_id ?? string.Empty,
+                            rounds = userBets.Competition.rounds ?? string.Empty,
+                            competition_img = userBets.Competition.competition_img ?? string.Empty,
+                            number_attendees = userBets.Competition.number_attendees,
+                        },
+                        KoiRegistration = userBets.KoiRegistration == null ? null : new KoiRegistration
+                        {
+                            RegistrationId = userBets.KoiRegistration.RegistrationId ?? string.Empty,
+                            StatusRegistration = userBets.KoiRegistration.StatusRegistration ?? string.Empty,
+                            SlotRegistration = userBets.KoiRegistration.SlotRegistration,
+                            RegistrationFee = userBets.KoiRegistration.RegistrationFee,
+                            koi_id = userBets.KoiRegistration.koi_id ?? string.Empty,
+                            competition_id = userBets.KoiRegistration.competition_id ?? string.Empty,
+                            CategoryId = userBets.KoiRegistration.CategoryId ?? string.Empty
+                        },
                     })
                     .ToListAsync();
 
