@@ -27,6 +27,12 @@ public class CompetitionMatchController : ControllerBase
         return await _competitionMatch.HandleGetMatch(competitionMatchId);
     }
 
+    [HttpGet("Get Competition By CompeId")]
+    public async Task<IActionResult> GetCompetitionMatchByCompeId([FromQuery]string competitionMatchId)
+    {
+        return await _competitionMatch.HandleGetMatchByCompeId(competitionMatchId);
+    }
+
     [HttpPost("Create CompetitionMatch")]
     public async Task<IActionResult> CreateCompetitionMatch([FromBody]CreateCompetitionMatchDTO _createCompetitionMatch)
     {

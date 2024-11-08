@@ -14,6 +14,7 @@ namespace KoiBet.Service
         Task<IActionResult> HandleProcessingMatch(ProcessingMatchDTO ProcessingMatchDto);
         Task<IActionResult> HandleDeleteMatch(string matchId);
         Task<IActionResult> HandleGetMatch(string matchId);
+        Task<IActionResult> HandleGetMatchByCompeId(string competitionMatchId);
     }
 
     public class CompetitionMatchService : ControllerBase, ICompetitionMatchService
@@ -33,6 +34,7 @@ namespace KoiBet.Service
                 var matches = await _context.CompetitionMatch
                     .Include(c => c.FirstKoi).ThenInclude(cb => cb.User)
                     .Include(c => c.SecondKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.Scores).ThenInclude(cb => cb.Referee).ThenInclude(cd=> cd.User)
                     //.Select(match => new CompetitionMatch
                     //{
                     //    match_id = match.match_id,
@@ -223,6 +225,7 @@ namespace KoiBet.Service
                 var match = await _context.CompetitionMatch
                     .Include(c => c.FirstKoi).ThenInclude(cb => cb.User)
                     .Include(c => c.SecondKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.Scores).ThenInclude(cb => cb.Referee).ThenInclude(cd => cd.User)
                     .FirstOrDefaultAsync(m => m.match_id == matchId);
 
                 if (match == null)
@@ -231,6 +234,31 @@ namespace KoiBet.Service
                 }
 
                 return Ok(match);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving match: {ex.Message}");
+            }
+        }
+
+        // Get a specific Match by CompeID
+        public async Task<IActionResult> HandleGetMatchByCompeId(string compeId)
+        {
+            try
+            {
+                var matches = _context.CompetitionMatch
+                    .Include(c => c.FirstKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.SecondKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.Scores).ThenInclude(cb => cb.Referee).ThenInclude(cd => cd.User)
+                    .Where(m => m.match_id.Contains(compeId))
+                    .ToList();
+
+                if (matches == null)
+                {
+                    return NotFound("Match not found!");
+                }
+
+                return Ok(matches);
             }
             catch (Exception ex)
             {
