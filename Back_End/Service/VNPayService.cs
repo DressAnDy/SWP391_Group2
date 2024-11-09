@@ -49,6 +49,8 @@ public class VnPayService : ControllerBase, IVNPayService
         {
             var tick = DateTime.Now.Ticks.ToString();
 
+            var user = _context.Users.FirstOrDefault(c => c.user_id == userId);
+
             var vnpReturnUrl = $"http://localhost:5173/member/payment"; ; 
 
             _vnPayRepo.AddRequestData("vnp_Version", _vnpVersion);
@@ -59,10 +61,10 @@ public class VnPayService : ControllerBase, IVNPayService
             _vnPayRepo.AddRequestData("vnp_CurrCode", _vnpCurrCode);
             _vnPayRepo.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(context));
             _vnPayRepo.AddRequestData("vnp_Locale", _vnpLocale);
-            _vnPayRepo.AddRequestData("vnp_OrderInfo", "Thanh toan don hang:" + userId + "-" + vnPayRequestDTO.Amount);
+            _vnPayRepo.AddRequestData("vnp_OrderInfo", "Thanh toan don hang:" + user.Username);
             _vnPayRepo.AddRequestData("vnp_OrderType", "other"); //default value: other
             _vnPayRepo.AddRequestData("vnp_ReturnUrl", vnpReturnUrl);
-            _vnPayRepo.AddRequestData("vnp_TxnRef", userId);
+            _vnPayRepo.AddRequestData("vnp_TxnRef", user.Username + (vnPayRequestDTO.Amount * 100).ToString());
 
             var paymentUrl = _vnPayRepo.CreateRequestUrl(_vnpBaseUrl, _vnpHashSecret);
 
