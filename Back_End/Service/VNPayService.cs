@@ -2,6 +2,7 @@
 using Infrastructure.VNPay;
 using KoiBet.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
@@ -78,40 +79,59 @@ public class VnPayService : ControllerBase, IVNPayService
         try
         {
             var result = new VnPayResponseDTO();
-            //var vnp_SecureHash;
+
             foreach (var (key, value) in collection)
             {
                 if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
                 {
                     _vnPayRepo.AddResponseData(key, value.ToString());
                 }
-                var vnp_SecureHash = collection.FirstOrDefault(r => r.Key == "vnp_SecureHash").Value;
-
-                bool checkSignature = _vnPayRepo.ValidateSignature(vnp_SecureHash, _vnpHashSecret);
-                if (!checkSignature)
-                {
-                    result.Success = false;
-                    return BadRequest("Payment not successfull!");
-                }
             }
-            result.Success = true; 
+
+            var vnp_SecureHash = collection.FirstOrDefault(r => r.Key == "vnp_SecureHash").Value;
+
+            bool checkSignature = _vnPayRepo.ValidateSignature(vnp_SecureHash, _vnpHashSecret);
+            if (!checkSignature)
+            {
+                result.Success = false;
+                return BadRequest("Payment verification failed due to invalid signature.");
+            }
+
             result.OrderId = _vnPayRepo.GetResponseData("vnp_TxnRef");
             result.PaymentMethod = "VNPay";
             result.OrderDescription = _vnPayRepo.GetResponseData("vnp_OrderInfo");
-            result.OrderId = _vnPayRepo.GetResponseData("vnp_TxnRef");
             result.TransactionId = _vnPayRepo.GetResponseData("vnp_TransactionNo");
             result.VnPayResponseCode = _vnPayRepo.GetResponseData("vnp_ResponseCode");
+            result.PaymentId = _vnPayRepo.GetResponseData("vnp_BankTranNo");
 
-            var user = _context.Users
-                .FirstOrDefault(u => u.user_id == result.OrderId);
+            if (result.VnPayResponseCode == "00") // "00" là mã thành công
+            {
+                result.Success = true;
 
-            user.Balance = user.Balance + Decimal.Parse(_vnPayRepo.GetResponseData("vnp_Amount"));
-
-            await _context.SaveChangesAsync();
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.user_id == result.OrderId);
+                if (user != null)
+                {
+                    user.Balance += decimal.Parse(_vnPayRepo.GetResponseData("vnp_Amount")) / 100; // Chia 100 để chuyển từ VND về đơn vị thập phân
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    result.Success = false;
+                    return NotFound("User not found.");
+                }
+            }
+            else
+            {
+                result.Success = false;
+                return BadRequest($"Payment failed with response code: {result.VnPayResponseCode}");
+            }
 
             return Ok(result);
         }
-        catch (Exception ex) { return BadRequest(ex.Message); }
+        catch (Exception ex)
+        {
+            return BadRequest($"An error occurred: {ex.Message}");
+        }
     }
 }
 

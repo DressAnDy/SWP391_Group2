@@ -24,12 +24,35 @@ public class VNPayRepo
         }
     }
 
-    public void AddResponseData(string key, string value)
+    public string AddResponseData(string key, string value)
     {
-        if (!string.IsNullOrEmpty(value))
+        var data = new StringBuilder();
+
+        // Xóa các tham số vnp_SecureHashType và vnp_SecureHash khỏi dữ liệu phản hồi
+        if (_responseData.ContainsKey("vnp_SecureHashType"))
         {
-            _responseData.Add(key, value);
+            _responseData.Remove("vnp_SecureHashType");
         }
+
+        if (_responseData.ContainsKey("vnp_SecureHash"))
+        {
+            _responseData.Remove("vnp_SecureHash");
+        }
+
+        // Tạo chuỗi tham số đã mã hóa URL (đảm bảo thứ tự đúng)
+        foreach (var entry in _responseData.Where(kv => !string.IsNullOrEmpty(kv.Value)))
+        {
+            data.Append(WebUtility.UrlEncode(entry.Key) + "=" + WebUtility.UrlEncode(entry.Value) + "&");
+        }
+
+        // Xóa ký tự '&' cuối cùng nếu có
+        if (data.Length > 0)
+        {
+            data.Remove(data.Length - 1, 1);
+        }
+
+        // Trả về chuỗi kết quả
+        return data.ToString();
     }
 
     public string GetResponseData(string key)
@@ -42,21 +65,22 @@ public class VNPayRepo
     {
         var data = new StringBuilder();
 
+        // Loops through the request data and adds each non-empty parameter to the query string.
         foreach (var (key, value) in _requestData.Where(kv => !string.IsNullOrEmpty(kv.Value)))
         {
             data.Append(WebUtility.UrlEncode(key) + "=" + WebUtility.UrlEncode(value) + "&");
         }
 
         var querystring = data.ToString();
-
         baseUrl += "?" + querystring;
-        var signData = querystring;
-        if (signData.Length > 0)
-        {
-            signData = signData.Remove(data.Length - 1, 1);
-        }
 
+        // Remove the last '&' from the query string.
+        var signData = querystring.TrimEnd('&');
+
+        // Calculate the secure hash using HMACSHA512.
         var vnpSecureHash = Utils.HmacSHA512(vnpHashSecret, signData);
+
+        // Add the secure hash to the base URL.
         baseUrl += "vnp_SecureHash=" + vnpSecureHash;
 
         return baseUrl;
