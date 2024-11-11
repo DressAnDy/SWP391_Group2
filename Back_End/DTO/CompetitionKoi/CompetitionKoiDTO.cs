@@ -10,7 +10,7 @@ namespace KoiBet.DTO.Competition
         [Key]
         public string CompetitionId { get; init; }
 
-        public string CompetitionName { get; init; }
+        public string? CompetitionName { get; init; }
 
         public string? CompetitionDescription { get; init; }
 
@@ -24,7 +24,7 @@ namespace KoiBet.DTO.Competition
         public string? koi_id { get; set; }
         public string? referee_id { get; set; }
         public string? award_id { get; set; }
-        public int number_attendees { get; set; }
+        public int? number_attendees { get; set; }
 
         public KoiCategory? KoiCategory { get; set; }
 

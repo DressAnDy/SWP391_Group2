@@ -7,10 +7,6 @@ namespace KoiBet.DTO.Competition
 
         public string? CompetitionDescription { get; init; }
 
-        public DateTime? StartTime { get; init; }
-
-        public DateTime? EndTime { get; init; }
-
         public string? StatusCompetition { get; init; }
 
         public string Round { get; init; }

@@ -158,8 +158,6 @@ namespace Service.ICompetitionService
 
                 competition.competition_name = updateCompetitionDto.CompetitionName;
                 competition.competition_description = updateCompetitionDto.CompetitionDescription;
-                DateTime startTime = competition.start_time;
-                DateTime endTime = competition.end_time;
                 competition.status_competition = updateCompetitionDto.StatusCompetition;
                 competition.category_id = updateCompetitionDto.KoiCategoryId;
                 competition.koi_id = updateCompetitionDto.KoiFishId;
@@ -168,12 +166,12 @@ namespace Service.ICompetitionService
                 competition.competition_img = updateCompetitionDto.CompetitionImg;
                 competition.number_attendees = (int)Math.Pow(2, Double.Parse(updateCompetitionDto.Round));
 
-                if(competition.status_competition == "Active")
-                {
-                    var oldRound = _context.CompetitionRound
+                var oldRound = _context.CompetitionRound
                             .Where(c => c.competition_id == competition.competition_id)
                             .ToList();
 
+                if (competition.status_competition == "Active")
+                {
                     if(oldRound.Count != 0)
                     {
                         _context.CompetitionRound
@@ -192,6 +190,15 @@ namespace Service.ICompetitionService
                         };
 
                         _context.CompetitionRound.Add(round);
+                    }
+                }
+                else
+                {
+                    if (oldRound.Count != 0)
+                    {
+                        _context.CompetitionRound
+                            .RemoveRange(oldRound);
+                        await _context.SaveChangesAsync();
                     }
                 }
 
