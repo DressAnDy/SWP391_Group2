@@ -25,7 +25,6 @@ namespace KoiBet.Controllers
 
         // POST: auth/login
         [Authorize]
-        [AllowAnonymous]
         [HttpPost("Get-Payment-Url")]
         public async Task<IActionResult> GetVNPayUrl([FromBody] VnPayRequestDTO vnPayRequestDTO)
         {
@@ -36,10 +35,20 @@ namespace KoiBet.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost]
-        public async Task<IActionResult> ProcessVNPay(/*[FromQuery] string paymentUrl*/)
+        [HttpPost("Process-Payment")]
+        public async Task<IActionResult> ProcessVNPay([FromBody] VnPayProcessDTO vnPayProcessDTO)
         {
-            return await _vnPayService.HandleVNPay(Request.Query);
+            return await _vnPayService.HandleVNPay(vnPayProcessDTO);
+        }
+
+        [Authorize]
+        [HttpPost("Get-Transactions")]
+        public async Task<IActionResult> GetTransaction()
+        {
+            var currentUser = HttpContext.User;
+            var currentUserId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return await _vnPayService.HandleGetTransactions(currentUserId);
         }
     }
 }

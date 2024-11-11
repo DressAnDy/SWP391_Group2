@@ -1,6 +1,6 @@
 ﻿using KoiBet.DTO.User;
 
-namespace KoiBet.DTO.Transactions
+namespace KoiBet.DTO
 {
     public class TransactionsDTO
     {

@@ -7,7 +7,7 @@ namespace KoiBet.Entities
     public class Transactions
     {
         [Key]
-        public int transactions_id { get; set; }
+        public string transactions_id { get; set; }
 
         [Required]
         [ForeignKey("users_id")]
@@ -18,7 +18,11 @@ namespace KoiBet.Entities
         public decimal Amount { get; set; }
 
         [Required]
-        public DateTime transactions_time { get; set; }  
+        public DateTime transactions_time { get; set; }
+
+        [Required]
+        public string? messages { get; set; }
+
         public virtual Users User { get; set; }
 
     }

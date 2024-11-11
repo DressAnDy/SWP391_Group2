@@ -17,3 +17,9 @@ public class VnPayRequestDTO
     public decimal Amount { get; set; }
 }
 
+public class VnPayProcessDTO
+{
+    public string UserName { get; set; }
+    public decimal Amount { get; set; }
+}
+
