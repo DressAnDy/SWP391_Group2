@@ -32,69 +32,203 @@
                 _context = context;
             }
 
-            // Đặt cược mới
-            public async Task<IActionResult> HandlePlaceBet(CreateBetDTO createBetDto)
+        // Đặt cược mới
+        public async Task<IActionResult> HandlePlaceBet(CreateBetDTO createBetDto)
+        {
+            try
             {
-                try
+                // Lấy thông tin người dùng
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.user_id == createBetDto.UserId);
+
+                if (user == null)
                 {
-                    // Lấy thông tin người dùng
-                    var user = await _context.Users
-                        .FirstOrDefaultAsync(u => u.user_id == createBetDto.UserId);
-
-                    if (user == null)
-                    {
-                        return BadRequest("User not found.");
-                    }
-
-                    // Kiểm tra số dư
-                    if (user.Balance < createBetDto.BetAmount)
-                    {
-                        return BadRequest("Insufficient balance.");
-                    }
-
-                    // Lấy ID cuối cùng và tăng lên cho ID mới
-                    var lastBet = await _context.KoiBet
-                        .OrderByDescending(b => b.bet_id)
-                        .FirstOrDefaultAsync();
-
-                    int newBetNumber = 1;
-
-                    if (lastBet != null && lastBet.bet_id.StartsWith("Bet_"))
-                    {
-                        int.TryParse(lastBet.bet_id.Substring(4), out newBetNumber);
-                        newBetNumber++;
-                    }
-
-                    string newBetId = $"Bet_{newBetNumber}";
-
-                    // Tạo đối tượng Bet mới
-                    var bet = new BetKoi()
-                    {
-                        bet_id = newBetId,
-                        users_id = createBetDto.UserId,
-                        registration_id = createBetDto.RegistrationId,
-                        competition_id = createBetDto.CompetitionId,
-                        bet_amount = createBetDto.BetAmount
-                    };
-
-                    // Trừ số tiền đặt cược từ số dư của người dùng
-                    user.Balance -= createBetDto.BetAmount;
-
-                    // Lưu thay đổi vào cơ sở dữ liệu
-                    _context.KoiBet.Add(bet);
-                    await _context.SaveChangesAsync();
-
-                    return Ok(bet);
+                    return BadRequest("User not found.");
                 }
-                catch (Exception ex)
+
+                // Kiểm tra số dư
+                if (user.Balance < createBetDto.BetAmount)
                 {
-                    // Xử lý lỗi nếu có
-                    return StatusCode(500, $"Error occurred: {ex.Message}");
+                    return BadRequest("Insufficient balance.");
                 }
+
+                // Debug: Kiểm tra KoiId
+                Console.WriteLine($"KoiId from DTO: {createBetDto.KoiId}");
+
+                // Lấy thông tin đăng ký koi
+                var registration = await _context.KoiRegistration
+                    .FirstOrDefaultAsync(r => r.koi_id == createBetDto.KoiId);
+
+                if (registration == null)
+                {
+                    // Debug: KoiRegistration không tìm thấy
+                    Console.WriteLine("KoiRegistration not found.");
+                    return BadRequest("Registration not found.");
+                }
+
+                // Tiếp tục xử lý như cũ
+                var match = await _context.CompetitionMatch
+                    .Include(m => m.Round)
+                        .ThenInclude(r => r.CompetitionKoi)
+                    .FirstOrDefaultAsync(m => m.match_id == createBetDto.MatchId);
+
+                if (match == null || match.Round == null || match.Round.CompetitionKoi == null)
+                {
+                    return BadRequest("Match or associated competition not found.");
+                }
+
+                var competitionId = match.Round.CompetitionKoi.competition_id;
+
+                // Tạo mã Bet mới
+                var lastBet = await _context.KoiBet
+                    .OrderByDescending(b => b.bet_id)
+                    .FirstOrDefaultAsync();
+
+                int newBetNumber = 1;
+                if (lastBet != null && lastBet.bet_id.StartsWith("Bet_"))
+                {
+                    int.TryParse(lastBet.bet_id.Substring(4), out newBetNumber);
+                    newBetNumber++;
+                }
+
+                string newBetId = $"Bet_{newBetNumber}";
+
+                // Kiểm tra nếu BetKoi đã tồn tại trong DbContext và tách nó ra
+                var existingBetKoi = await _context.KoiBet
+                    .AsNoTracking() // Truy vấn không theo dõi
+                    .FirstOrDefaultAsync(b => b.bet_id == newBetId);
+
+                if (existingBetKoi != null)
+                {
+                    // Tách đối tượng cũ ra khỏi DbContext
+                    _context.Entry(existingBetKoi).State = EntityState.Detached;
+                }
+
+                // Tạo đối tượng Bet mới
+                var bet = new BetKoi()
+                {
+                    bet_id = newBetId,
+                    users_id = createBetDto.UserId,
+                    registration_id = registration.RegistrationId, // sử dụng registration_id từ KoiRegistration
+                    competition_id = competitionId,
+                    bet_amount = createBetDto.BetAmount
+                };
+
+                // Trừ số tiền đặt cược từ số dư của người dùng
+                user.Balance -= createBetDto.BetAmount;
+
+                // Lưu thay đổi vào cơ sở dữ liệu
+                _context.KoiBet.Add(bet);
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    BetId = bet.bet_id,
+                    UserId = bet.users_id,
+                    MatchId = createBetDto.MatchId,
+                    KoiId = createBetDto.KoiId,
+                    RegistrationId = registration.RegistrationId,
+                    CompetitionId = competitionId,
+                    BetAmount = bet.bet_amount
+                });
             }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi nếu có
+                return StatusCode(500, $"Error occurred: {ex.Message}");
+            }
+        }
 
-            // Lấy danh sách cược của người dùng
-            public async Task<IActionResult> HandleGetUserBets(string userId)
+        //public async Task<IActionResult> HandlePlaceBet(CreateBetDTO createBetDto)
+        //{
+        //    try
+        //    {
+        //        // Lấy thông tin người dùng
+        //        var user = await _context.Users
+        //            .FirstOrDefaultAsync(u => u.user_id == createBetDto.UserId);
+
+        //        if (user == null)
+        //        {
+        //            return BadRequest("User not found.");
+        //        }
+
+        //        // Kiểm tra số dư
+        //        if (user.Balance < createBetDto.BetAmount)
+        //        {
+        //            return BadRequest("Insufficient balance.");
+        //        }
+
+        //        // Lấy thông tin cuộc thi
+        //        var match = await _context.CompetitionMatch
+        //            .Include(m => m.Round)
+        //                .ThenInclude(r => r.CompetitionKoi)
+        //            .FirstOrDefaultAsync(m => m.match_id == createBetDto.MatchId);
+
+        //        if (match == null || match.Round == null || match.Round.CompetitionKoi == null)
+        //        {
+        //            return BadRequest("Match or associated competition not found.");
+        //        }
+
+        //        var competitionId = match.Round.CompetitionKoi.competition_id;
+
+        //        // Tạo mã Bet mới
+        //        var lastBet = await _context.KoiBet
+        //            .OrderByDescending(b => b.bet_id)
+        //            .FirstOrDefaultAsync();
+
+        //        int newBetNumber = 1;
+        //        if (lastBet != null && lastBet.bet_id.StartsWith("Bet_"))
+        //        {
+        //            int.TryParse(lastBet.bet_id.Substring(4), out newBetNumber);
+        //            newBetNumber++;
+        //        }
+
+        //        string newBetId = $"Bet_{newBetNumber}";
+
+        //        // Kiểm tra đối tượng BetKoi đã tồn tại trong DbContext
+        //        var existingBet = _context.KoiBet.Local.FirstOrDefault(b => b.bet_id == newBetId);
+        //        if (existingBet != null)
+        //        {
+        //            // Tách đối tượng cũ ra khỏi DbContext
+        //            _context.Entry(existingBet).State = EntityState.Detached;
+        //        }
+
+        //        // Tạo đối tượng Bet mới, không sử dụng registrationId
+        //        var bet = new BetKoi()
+        //        {
+        //            bet_id = newBetId,
+        //            users_id = createBetDto.UserId,
+        //            competition_id = competitionId,
+        //            bet_amount = createBetDto.BetAmount
+        //        };
+
+        //        // Trừ số tiền đặt cược từ số dư của người dùng
+        //        user.Balance -= createBetDto.BetAmount;
+
+        //        // Lưu thay đổi vào cơ sở dữ liệu
+        //        _context.KoiBet.Add(bet);
+        //        await _context.SaveChangesAsync();
+
+        //        return Ok(new
+        //        {
+        //            BetId = bet.bet_id,
+        //            UserId = bet.users_id,
+        //            MatchId = createBetDto.MatchId,
+        //            KoiId = createBetDto.KoiId,
+        //            CompetitionId = competitionId,
+        //            BetAmount = bet.bet_amount
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Xử lý lỗi nếu có
+        //        return StatusCode(500, $"Error occurred: {ex.Message}");
+        //    }
+        //}
+
+
+        // Lấy danh sách cược của người dùng
+        public async Task<IActionResult> HandleGetUserBets(string userId)
             {
                 var userBets = await _context.KoiBet
                     .Include(b => b.Competition)
