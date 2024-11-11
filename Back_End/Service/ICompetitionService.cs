@@ -192,15 +192,15 @@ namespace Service.ICompetitionService
                         _context.CompetitionRound.Add(round);
                     }
                 }
-                else
-                {
-                    if (oldRound.Count != 0)
-                    {
-                        _context.CompetitionRound
-                            .RemoveRange(oldRound);
-                        await _context.SaveChangesAsync();
-                    }
-                }
+                //else
+                //{
+                //    if (oldRound.Count != 0)
+                //    {
+                //        _context.CompetitionRound
+                //            .RemoveRange(oldRound);
+                //        await _context.SaveChangesAsync();
+                //    }
+                //}
 
                 competition.rounds = updateCompetitionDto.Round;
                 _context.CompetitionKoi.Update(competition);
