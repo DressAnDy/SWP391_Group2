@@ -1,13 +1,16 @@
 ﻿using DTO.VNPay;
 using Infrastructure.VNPay;
 using KoiBet.Data;
+using KoiBet.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Transactions;
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace Service.VNPayService;
@@ -15,7 +18,8 @@ namespace Service.VNPayService;
 public interface IVNPayService
 {
     public Task<IActionResult> HandleCreateVNPayUrl(HttpContext context, VnPayRequestDTO vnPayRequestDTO, string userId);
-    public Task<IActionResult> HandleVNPay(IQueryCollection collection);
+    public Task<IActionResult> HandleGetTransactions(string currentUserId);
+    public Task<IActionResult> HandleVNPay(VnPayProcessDTO vnPayProcessDTO);
 }
 
 
@@ -50,6 +54,8 @@ public class VnPayService : ControllerBase, IVNPayService
         {
             var tick = DateTime.Now.Ticks.ToString();
 
+            var user = _context.Users.FirstOrDefault(c => c.user_id == userId);
+
             var vnpReturnUrl = $"http://localhost:5173/member/payment"; ; 
 
             _vnPayRepo.AddRequestData("vnp_Version", _vnpVersion);
@@ -60,10 +66,10 @@ public class VnPayService : ControllerBase, IVNPayService
             _vnPayRepo.AddRequestData("vnp_CurrCode", _vnpCurrCode);
             _vnPayRepo.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(context));
             _vnPayRepo.AddRequestData("vnp_Locale", _vnpLocale);
-            _vnPayRepo.AddRequestData("vnp_OrderInfo", "Thanh toan don hang:" + userId + "-" + vnPayRequestDTO.Amount);
-            _vnPayRepo.AddRequestData("vnp_OrderType", "other");
+            _vnPayRepo.AddRequestData("vnp_OrderInfo", user.Username);
+            _vnPayRepo.AddRequestData("vnp_OrderType", "other"); //default value: other
             _vnPayRepo.AddRequestData("vnp_ReturnUrl", vnpReturnUrl);
-            _vnPayRepo.AddRequestData("vnp_TxnRef", userId);
+            _vnPayRepo.AddRequestData("vnp_TxnRef", user.Username + (vnPayRequestDTO.Amount * 100).ToString());
 
             var paymentUrl = _vnPayRepo.CreateRequestUrl(_vnpBaseUrl, _vnpHashSecret);
 
@@ -72,59 +78,53 @@ public class VnPayService : ControllerBase, IVNPayService
         }
         catch (Exception ex) { return BadRequest(ex.Message); }
     }
-    public async Task<IActionResult> HandleVNPay(IQueryCollection collection)
+    public async Task<IActionResult> HandleVNPay(VnPayProcessDTO vnPayProcessDTO)
     {
         try
         {
-            var result = new VnPayResponseDTO();
+            var user = _context.Users
+                .FirstOrDefault(c => c.Username == vnPayProcessDTO.UserName);
 
-            foreach (var (key, value) in collection)
+            user.Balance += vnPayProcessDTO.Amount;
+            _context.Users.Update(user);
+
+            var random = new Random();
+            var id = 0;
+            for (int i = 0; i < 8; i++)
             {
-                if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
-                {
-                    _vnPayRepo.AddResponseData(key, value.ToString());
-                }
+                id = id * 10 + random.Next(10);
             }
 
-            var vnp_SecureHash = collection.FirstOrDefault(r => r.Key == "vnp_SecureHash").Value;
-
-            bool checkSignature = _vnPayRepo.ValidateSignature(vnp_SecureHash, _vnpHashSecret);
-            if (!checkSignature)
+            var transaction = new Transactions
             {
-                result.Success = false;
-                return BadRequest("Payment verification failed due to invalid signature.");
-            }
+                transactions_id = id.ToString(),
+                users_id = user.user_id,
+                Amount = vnPayProcessDTO.Amount,
+                transactions_time = DateTime.Now,
+                messages = "Topup Balance"
+            };
 
-            result.OrderId = _vnPayRepo.GetResponseData("vnp_TxnRef");
-            result.PaymentMethod = "VNPay";
-            result.OrderDescription = _vnPayRepo.GetResponseData("vnp_OrderInfo");
-            result.TransactionId = _vnPayRepo.GetResponseData("vnp_TransactionNo");
-            result.VnPayResponseCode = _vnPayRepo.GetResponseData("vnp_ResponseCode");
-            result.PaymentId = _vnPayRepo.GetResponseData("vnp_BankTranNo");
+            _context.Transactions.Add(transaction);
 
-            if (result.VnPayResponseCode == "00") // "00" là mã thành công
-            {
-                result.Success = true;
+            _context.SaveChanges();
 
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.user_id == result.OrderId);
-                if (user != null)
-                {
-                    user.Balance += decimal.Parse(_vnPayRepo.GetResponseData("vnp_Amount")) / 100; // Chia 100 để chuyển từ VND về đơn vị thập phân
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    result.Success = false;
-                    return NotFound("User not found.");
-                }
-            }
-            else
-            {
-                result.Success = false;
-                return BadRequest($"Payment failed with response code: {result.VnPayResponseCode}");
-            }
+            return Ok("Update Balance Success!");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"An error occurred: {ex.Message}");
+        }
+    }
 
-            return Ok(result);
+    public async Task<IActionResult> HandleGetTransactions(string currentUserId)
+    {
+        try
+        {
+            var transactions = _context.Transactions
+                .Where(c => c.users_id == currentUserId)
+                .ToList();
+
+            return Ok(transactions);
         }
         catch (Exception ex)
         {
