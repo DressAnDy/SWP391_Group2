@@ -35,7 +35,7 @@ namespace KoiBet.Controllers
         }
 
         [HttpPost("Update Competition")]
-        public async Task<IActionResult> UpdateCompetition([FromBody] UpdateCompetitionDTO _updateCompetition)
+        public async Task<IActionResult> UpdateCompetition([FromQuery] UpdateCompetitionDTO _updateCompetition)
         {
             return await _competitionService.HandleUpdateCompetition(_updateCompetition);
 
