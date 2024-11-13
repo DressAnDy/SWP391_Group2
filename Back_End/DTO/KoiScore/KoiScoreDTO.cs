@@ -12,4 +12,10 @@ namespace KoiBet.DTO
         public string MatchId { get; set; } 
         public decimal Score { get; set; }
     }
+
+    public class SearchKoiScoreDTO
+    {
+        public string KoiId { get; set; }
+        public string? CompetitionId { get; set; }
+    }
 }

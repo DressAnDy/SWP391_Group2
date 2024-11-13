@@ -11,7 +11,7 @@ namespace KoiBet.Service
         Task<IActionResult> HandleGetAllKoiScore();
         Task<IActionResult> HandleCreateKoiScore(string refereeId, CreateKoiScoreDTO createKoiScoreDTO);
         Task<IActionResult> HandleGetKoiScoreByRefereeId(string currentUserId, string competitionId);
-        Task<IActionResult> HandleGetKoiScoreByKoiId(string koiId);
+        Task<IActionResult> HandleGetKoiScoreByKoiIdAndCompeId(SearchKoiScoreDTO searchKoiScoreDTO);
         //Task<IActionResult> HandleUpdateKoiScore(string refereeId, UpdateKoiScoreDTO updateKoiScoreDTO);
         //Task<IActionResult> HandleDeleteKoiScore(string koiScoreId);
         //Task<IActionResult> HandleGetKoiScoreById(string koiScoreId);
@@ -80,21 +80,29 @@ namespace KoiBet.Service
             }
         }
 
-        public async Task<IActionResult> HandleGetKoiScoreByKoiId(string koiId)
+        public async Task<IActionResult> HandleGetKoiScoreByKoiIdAndCompeId(SearchKoiScoreDTO searchKoiScoreDTO)
         {
             try
             {
-                var score = _context.KoiScore
-                    .Include(c => c.FishKoi)
-                    .Where(c => c.koi_id == koiId)
-                    .ToList();
+                var query = _context.KoiScore
+                    .Include(c => c.FishKoi).ThenInclude(cs => cs.User)
+                    .Include(c => c.Referee).ThenInclude(cs => cs.User)
+                    .Where(c => c.koi_id == searchKoiScoreDTO.KoiId)
+                    .AsQueryable();
 
-                if (score == null)
+                if(searchKoiScoreDTO.CompetitionId != null)
+                {
+                    query = query.Where(c => c.match_id.Contains(searchKoiScoreDTO.CompetitionId));
+                }
+
+                var scores = query.ToList();
+
+                if (scores == null)
                 {
                     return NotFound("No scores found!");
                 }
 
-                return Ok(score);
+                return Ok(scores);
             }
             catch (Exception ex)
             {
@@ -133,27 +141,30 @@ namespace KoiBet.Service
                     score_koi = createKoiScoreDTO.Score,
                     koi_id = createKoiScoreDTO.KoiId,
                     match_id = createKoiScoreDTO.MatchId,
+                    FishKoi = await _context.FishKoi.FirstOrDefaultAsync(c => c.koi_id == createKoiScoreDTO.KoiId),
                 };
 
                 _context.KoiScore.Add(newScore);
+
+
 
                 var match = _context.CompetitionMatch
                     .FirstOrDefault(c => c.match_id == createKoiScoreDTO.MatchId);
 
                 if(match.result == "Pending")
                 {
-                    match.result = createKoiScoreDTO.KoiId + "_" + createKoiScoreDTO.Score;
+                    match.result = newScore.FishKoi.koi_name + "_" + createKoiScoreDTO.Score;
                 }
                 else
                 {
                     var result = decimal.Parse(match.result.Split('_')[1]);
                     if(result < createKoiScoreDTO.Score)
                     {
-                        match.result = createKoiScoreDTO.KoiId + "_" + createKoiScoreDTO.Score;
+                        match.result = newScore.FishKoi.koi_name + "_" + createKoiScoreDTO.Score;
                     }
                     else if(result == createKoiScoreDTO.Score)
                     {
-                        match.result = "Even";
+                        match.result = "Even_" + createKoiScoreDTO.Score;
                     }
                 }
 

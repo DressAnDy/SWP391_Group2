@@ -167,8 +167,9 @@ namespace Service.ICompetitionService
                 competition.number_attendees = (int)Math.Pow(2, Double.Parse(updateCompetitionDto.Round));
 
                 var oldRound = _context.CompetitionRound
-                            .Where(c => c.competition_id == competition.competition_id)
-                            .ToList();
+                    .Include(c => c.Matches).ThenInclude(cs => cs.Scores)
+                    .Where(c => c.competition_id == competition.competition_id)
+                    .ToList();
 
                 if (competition.status_competition == "Active")
                 {
@@ -176,6 +177,10 @@ namespace Service.ICompetitionService
                     {
                         _context.CompetitionRound
                             .RemoveRange(oldRound);
+                        _context.CompetitionMatch
+                            .RemoveRange(oldRound.SelectMany(r => r.Matches));
+                        _context.KoiScore
+                            .RemoveRange(oldRound.SelectMany(r => r.Matches.SelectMany(m => m.Scores)));
                         await _context.SaveChangesAsync();
                     }
 
