@@ -23,7 +23,9 @@ namespace KoiBet.Entities
 
         [JsonIgnore]
         public virtual Users User { get; set; }
+        [JsonIgnore]
         public virtual KoiRegistration KoiRegistration { get; set; }
+        [JsonIgnore]
         public virtual CompetitionKoi Competition { get; set; }
     }
 }

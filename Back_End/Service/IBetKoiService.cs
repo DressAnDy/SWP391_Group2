@@ -4,8 +4,7 @@
     using KoiBet.Entities;
     using Microsoft.EntityFrameworkCore;
     using System;
-    using KoiBet.DTO.Bet;
-    using KoiBet.DTO.BetKoi;
+    using KoiBet.DTO;
     using KoiBet.DTO.User;
 
     namespace Service.IBetKoiService

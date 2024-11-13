@@ -1,4 +1,4 @@
-namespace KoiBet.DTO.Bet
+namespace KoiBet.DTO
 {
     public class CreateBetDTO
     {

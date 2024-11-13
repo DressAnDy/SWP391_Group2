@@ -8,27 +8,27 @@ namespace KoiBet.DTO.Competition
     public class CompetitionKoiDTO
     {
         [Key]
-        public string CompetitionId { get; init; }
+        public string competition_id { get; init; }
 
-        public string? CompetitionName { get; init; }
+        public string? competition_name { get; init; }
 
-        public string? CompetitionDescription { get; init; }
+        public string? competition_description { get; init; }
 
-        public DateTime? StartTime { get; init; }
+        public DateTime? start_time { get; init; }
 
-        public DateTime? EndTime { get; init; }
+        public DateTime? end_time { get; init; }
 
-        public string? StatusCompetition { get; init; }
-        public string Round { get; init; }
+        public string? status_competition { get; init; }
+        public string rounds { get; init; }
         public string? category_id { get; set; }
         public string? koi_id { get; set; }
         public string? referee_id { get; set; }
         public string? award_id { get; set; }
         public int? number_attendees { get; set; }
 
-        public KoiCategory? KoiCategory { get; set; }
+        public KoiCategory? Category { get; set; }
 
-        public KoiFishDTO? KoiFish { get; set; }
+        public KoiFishDTO? Koi { get; set; }
 
         public Referee? Referee { get; set; }
 
@@ -36,8 +36,9 @@ namespace KoiBet.DTO.Competition
 
         public KoiStandard? KoiStandard { get; set; }
         public List<KoiRegistration>? KoiRegistrations { get; set; }
-
-        public string? CompetitionImg { get; set; }
+        public FishKoi FishKoi { get; set; }
+        public List<BetKoi>? Bets { get; set; }
+        public string? competition_img { get; set; }
     }
 
     public class GetCompeByUserIdDTO

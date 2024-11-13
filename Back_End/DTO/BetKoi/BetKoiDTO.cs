@@ -3,7 +3,7 @@ using KoiBet.DTO.Competition;
 using KoiBet.Entities;
 using System.Text.Json.Serialization;
 
-namespace KoiBet.DTO.BetKoi
+namespace KoiBet.DTO
 {
     public class BetKoiDTO
     {

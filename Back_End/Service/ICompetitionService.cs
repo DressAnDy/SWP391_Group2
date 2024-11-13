@@ -51,28 +51,8 @@ namespace Service.ICompetitionService
                     .Include(c => c.Referee).ThenInclude(cs => cs.User)
                     .Include(c => c.Category).ThenInclude(cs => cs.KoiStandard)
                     .Include(c => c.KoiRegistrations).ThenInclude(cs => cs.FishKoi)
+                    .Include(c => c.Bets)
                     .ToListAsync();
-                //.Select(competition => new CompetitionKoiDTO
-                //{
-                //    CompetitionId = competition.competition_id,
-                //    CompetitionName = competition.competition_name,
-                //    CompetitionDescription = competition.competition_description,
-                //    StartTime = competition.start_time,
-                //    EndTime = competition.end_time,
-                //    StatusCompetition = competition.status_competition,
-                //    Round = competition.rounds,
-                //    category_id = competition.category_id,
-                //    koi_id = competition.koi_id,
-                //    referee_id = competition.referee_id,
-                //    award_id = competition.award_id,
-                //    CompetitionImg = competition.competition_img,
-                //    number_attendees = competition.number_attendees,
-                //    Award = competition.Award,
-                //    Referee = competition.Referee,
-                //    //KoiRegistrations = competition.KoiRegistrations.ToList(),
-                //    KoiCategory = competition.Category,
-                //    KoiStandard = competition.Category.KoiStandard,
-                //})
 
                 if (!competitions.Any())
                 {
@@ -259,12 +239,13 @@ namespace Service.ICompetitionService
         {
             try
             {
-                var competition = await _context.CompetitionKoi
+                var competition = _context.CompetitionKoi
                     .Include(c => c.Award)
                     .Include(c => c.Referee).ThenInclude(cs => cs.User)
                     .Include(c => c.Category).ThenInclude(cs => cs.KoiStandard)
                     .Include(c => c.KoiRegistrations).ThenInclude(cs => cs.FishKoi)
-                    .FirstOrDefaultAsync(d => d.competition_id == competitionId);
+                    .Include(c => c.Bets)
+                    .FirstOrDefault(d => d.competition_id == competitionId);
 
                 if (competition == null)
                 {

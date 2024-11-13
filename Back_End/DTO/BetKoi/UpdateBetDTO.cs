@@ -1,6 +1,6 @@
 using KoiBet.Entities;
 
-namespace KoiBet.DTO.Bet
+namespace KoiBet.DTO
 {
     public class UpdateBetDTO
     {

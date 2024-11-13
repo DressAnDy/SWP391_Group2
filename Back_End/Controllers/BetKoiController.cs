@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using KoiBet.DTO.Bet; // Ensure you have the correct namespace for DTOs
+using KoiBet.DTO; // Ensure you have the correct namespace for DTOs
 using Service.IBetKoiService;
 
 namespace KoiBet.Controllers
