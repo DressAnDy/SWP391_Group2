@@ -23,10 +23,10 @@ public class KoiScoreController : ControllerBase
         return await _koiScoreService.HandleGetAllKoiScore();
     }
 
-    [HttpGet("Get KoiScore By KoiId")]
-    public async Task<IActionResult> GetKoiScoreByKoiId(string koiId)
+    [HttpGet("Get KoiScore By KoiId And CompeId")]
+    public async Task<IActionResult> GetKoiScoreByKoiIdAndCompeId([FromQuery] SearchKoiScoreDTO searchKoiScoreDTO)
     {
-        return await _koiScoreService.HandleGetKoiScoreByKoiId(koiId);
+        return await _koiScoreService.HandleGetKoiScoreByKoiIdAndCompeId(searchKoiScoreDTO);
     }
 
     [Authorize]

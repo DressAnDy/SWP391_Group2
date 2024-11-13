@@ -11,7 +11,7 @@ namespace KoiBet.Service
         Task<IActionResult> HandleGetAllKoiScore();
         Task<IActionResult> HandleCreateKoiScore(string refereeId, CreateKoiScoreDTO createKoiScoreDTO);
         Task<IActionResult> HandleGetKoiScoreByRefereeId(string currentUserId, string competitionId);
-        Task<IActionResult> HandleGetKoiScoreByKoiId(string koiId);
+        Task<IActionResult> HandleGetKoiScoreByKoiIdAndCompeId(SearchKoiScoreDTO searchKoiScoreDTO);
         //Task<IActionResult> HandleUpdateKoiScore(string refereeId, UpdateKoiScoreDTO updateKoiScoreDTO);
         //Task<IActionResult> HandleDeleteKoiScore(string koiScoreId);
         //Task<IActionResult> HandleGetKoiScoreById(string koiScoreId);
@@ -80,21 +80,29 @@ namespace KoiBet.Service
             }
         }
 
-        public async Task<IActionResult> HandleGetKoiScoreByKoiId(string koiId)
+        public async Task<IActionResult> HandleGetKoiScoreByKoiIdAndCompeId(SearchKoiScoreDTO searchKoiScoreDTO)
         {
             try
             {
-                var score = _context.KoiScore
-                    .Include(c => c.FishKoi)
-                    .Where(c => c.koi_id == koiId)
-                    .ToList();
+                var query = _context.KoiScore
+                    .Include(c => c.FishKoi).ThenInclude(cs => cs.User)
+                    .Include(c => c.Referee).ThenInclude(cs => cs.User)
+                    .Where(c => c.koi_id == searchKoiScoreDTO.KoiId)
+                    .AsQueryable();
 
-                if (score == null)
+                if(searchKoiScoreDTO.CompetitionId != null)
+                {
+                    query = query.Where(c => c.match_id.Contains(searchKoiScoreDTO.CompetitionId));
+                }
+
+                var scores = query.ToList();
+
+                if (scores == null)
                 {
                     return NotFound("No scores found!");
                 }
 
-                return Ok(score);
+                return Ok(scores);
             }
             catch (Exception ex)
             {
