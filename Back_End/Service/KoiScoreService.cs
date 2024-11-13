@@ -133,27 +133,30 @@ namespace KoiBet.Service
                     score_koi = createKoiScoreDTO.Score,
                     koi_id = createKoiScoreDTO.KoiId,
                     match_id = createKoiScoreDTO.MatchId,
+                    FishKoi = await _context.FishKoi.FirstOrDefaultAsync(c => c.koi_id == createKoiScoreDTO.KoiId),
                 };
 
                 _context.KoiScore.Add(newScore);
+
+
 
                 var match = _context.CompetitionMatch
                     .FirstOrDefault(c => c.match_id == createKoiScoreDTO.MatchId);
 
                 if(match.result == "Pending")
                 {
-                    match.result = createKoiScoreDTO.KoiId + "_" + createKoiScoreDTO.Score;
+                    match.result = newScore.FishKoi.koi_name + "_" + createKoiScoreDTO.Score;
                 }
                 else
                 {
                     var result = decimal.Parse(match.result.Split('_')[1]);
                     if(result < createKoiScoreDTO.Score)
                     {
-                        match.result = createKoiScoreDTO.KoiId + "_" + createKoiScoreDTO.Score;
+                        match.result = newScore.FishKoi.koi_name + "_" + createKoiScoreDTO.Score;
                     }
                     else if(result == createKoiScoreDTO.Score)
                     {
-                        match.result = "Even";
+                        match.result = "Even_" + createKoiScoreDTO.Score;
                     }
                 }
 
