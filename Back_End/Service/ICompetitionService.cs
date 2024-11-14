@@ -73,9 +73,19 @@ namespace Service.ICompetitionService
         {
             try
             {
-                var lastCompetition = await _context.CompetitionKoi
+                var competitionQuery = _context.CompetitionKoi
                     .OrderByDescending(c => c.competition_id)
-                    .FirstOrDefaultAsync();
+                    .AsQueryable();
+
+                var refereeValidate = competitionQuery
+                    .FirstOrDefaultAsync(c => c.referee_id == createCompetitionDto.referee_id && c.status_competition == "Active");
+
+                if(refereeValidate != null)
+                {
+                    return BadRequest("Referee not available!");
+                }
+
+                var lastCompetition = await competitionQuery.FirstOrDefaultAsync();
 
                 int newIdNumber = 1; // Default ID starts at 1 if no records exist
 
@@ -128,12 +138,31 @@ namespace Service.ICompetitionService
         {
             try
             {
-                var competition = await _context.CompetitionKoi
+                var competitionQuery = _context.CompetitionKoi
+                    .OrderByDescending(c => c.competition_id)
+                    .AsQueryable();
+
+                var refereeValidate = competitionQuery
+                    .FirstOrDefaultAsync(c => c.referee_id == updateCompetitionDto.RefereeId && c.status_competition == "Active");
+
+                if (refereeValidate != null)
+                {
+                    return BadRequest("Referee not available!");
+                }
+
+                var competition = await competitionQuery
                     .FirstOrDefaultAsync(c => c.competition_id == updateCompetitionDto.CompetitionId);
 
                 if (competition == null)
                 {
                     return NotFound("Competition not found!");
+                }
+                else if (competition.KoiRegistrations.Any() && competition.status_competition == "Active")
+                {
+                    if(competition.number_attendees != updateCompetitionDto.number_attendees || updateCompetitionDto.StatusCompetition == "Inactive")
+                    {
+                        return BadRequest("Competition has already started!");
+                    }
                 }
 
                 competition.competition_name = updateCompetitionDto.CompetitionName;
@@ -144,7 +173,8 @@ namespace Service.ICompetitionService
                 competition.referee_id = updateCompetitionDto.RefereeId;
                 competition.award_id = updateCompetitionDto.AwardId;
                 competition.competition_img = updateCompetitionDto.CompetitionImg;
-                competition.number_attendees = (int)Math.Pow(2, Double.Parse(updateCompetitionDto.Round));
+                competition.number_attendees = updateCompetitionDto.number_attendees;
+                competition.rounds = (Math.Log(updateCompetitionDto.number_attendees, 2)).ToString();
 
                 var oldRound = _context.CompetitionRound
                     .Include(c => c.Matches).ThenInclude(cs => cs.Scores)
@@ -157,16 +187,12 @@ namespace Service.ICompetitionService
                     {
                         _context.CompetitionRound
                             .RemoveRange(oldRound);
-                        _context.CompetitionMatch
-                            .RemoveRange(oldRound.SelectMany(r => r.Matches));
-                        _context.KoiScore
-                            .RemoveRange(oldRound.SelectMany(r => r.Matches.SelectMany(m => m.Scores)));
                         await _context.SaveChangesAsync();
                     }
 
-                    for (int i = 1; i <= int.Parse(updateCompetitionDto.Round); i++)
+                    for (int i = 1; i <= int.Parse(competition.rounds); i++)
                     {
-                        var count = (int.Parse(updateCompetitionDto.Round) - i).ToString();
+                        var count = (int.Parse(competition.rounds) - i).ToString();
                         var round = new CompetitionRound
                         {
                             RoundId = updateCompetitionDto.CompetitionId + "_RND_" + i,
@@ -187,7 +213,6 @@ namespace Service.ICompetitionService
                 //    }
                 //}
 
-                competition.rounds = updateCompetitionDto.Round;
                 _context.CompetitionKoi.Update(competition);
 
                 var result = await _context.SaveChangesAsync();
