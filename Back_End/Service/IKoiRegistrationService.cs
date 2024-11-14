@@ -87,6 +87,24 @@ namespace KoiBet.Service
         {
             try
             {
+                var regisValidate = await _context.KoiRegistration
+                    .Where(c => c.koi_id == createKoiRegistrationDto.KoiId)
+                    .ToListAsync();
+
+                foreach(var regis in regisValidate)
+                {
+                    var compe = await _context.CompetitionKoi
+                        .FirstOrDefaultAsync(c => c.competition_id == regis.competition_id);
+
+                    if(compe != null)
+                    {
+                        if (compe.status_competition == "Active" && regis.StatusRegistration == "Accepted")
+                        {
+                            return BadRequest("Already in a competition!");
+                        }
+                    }
+                }
+
                 var lastRegistration = await _context.KoiRegistration
                     .OrderByDescending(r => r.RegistrationId)
                     .FirstOrDefaultAsync();
