@@ -9,12 +9,12 @@ namespace KoiBet.DTO.Competition
         public DateTime start_time { get; set; }
         public DateTime end_time { get; set; }
         public string status_competition { get; set; }
-        public string category_id { get; set; }
-        public string koi_id { get; set; }
-        public string referee_id { get; set; }
-        public string award_id { get; set; }
+        public string? category_id { get; set; }
+        public string? koi_id { get; set; }
+        public string? referee_id { get; set; }
+        public string? award_id { get; set; }
         //public string rounds { get; set; }
-        public string competition_img { get; set; }
+        public string? competition_img { get; set; }
         public int number_attendees { get; set; }
     }
 }

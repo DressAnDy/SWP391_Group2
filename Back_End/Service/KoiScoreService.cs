@@ -45,14 +45,14 @@ namespace KoiBet.Service
 
                 if (!scores.Any())
                 {
-                    return NotFound("No matches found!");
+                    return NotFound("No scores found!");
                 }
 
                 return Ok(scores);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error retrieving matches: {ex.Message}");
+                return BadRequest($"Error retrieving scores: {ex.Message}");
             }
         }
 
@@ -76,7 +76,7 @@ namespace KoiBet.Service
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error retrieving matches: {ex.Message}");
+                return BadRequest($"Error retrieving scores: {ex.Message}");
             }
         }
 
@@ -106,7 +106,7 @@ namespace KoiBet.Service
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error retrieving matches: {ex.Message}");
+                return BadRequest($"Error retrieving scores: {ex.Message}");
             }
         }
 
@@ -115,12 +115,20 @@ namespace KoiBet.Service
         {
             try
             {
+                var referee = await _context.Referee
+                    .FirstOrDefaultAsync(c => c.user_id == refereeId);
+
+                var compe = await _context.CompetitionKoi
+                    .FirstOrDefaultAsync(c => createKoiScoreDTO.MatchId.Contains(c.competition_id));
+
+                if(compe != null && compe.referee_id != referee.RefereeId)
+                {
+                    return BadRequest("Referee not authorized!");
+                }
+
                 var lastScore = await _context.KoiScore
                     .OrderByDescending(m => m.score_id)
                     .FirstOrDefaultAsync();
-
-                var referee = await _context.Referee
-                    .FirstOrDefaultAsync(c => c.user_id == refereeId);
 
                 int newScoreNumber = 1;
 
