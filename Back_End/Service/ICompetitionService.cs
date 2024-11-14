@@ -97,13 +97,13 @@ namespace Service.ICompetitionService
                     start_time = createCompetitionDto.start_time,
                     end_time = createCompetitionDto.end_time,
                     status_competition = createCompetitionDto.status_competition,
-                    rounds = createCompetitionDto.rounds,
+                    rounds = (Math.Log(createCompetitionDto.number_attendees, 2)).ToString(),
                     category_id = createCompetitionDto.category_id,
                     koi_id = createCompetitionDto.koi_id,
                     referee_id = createCompetitionDto.referee_id,
                     award_id = createCompetitionDto.award_id,
                     competition_img = createCompetitionDto.competition_img,
-                    number_attendees = (int)Math.Pow(2, Double.Parse(createCompetitionDto.rounds)),
+                    number_attendees = createCompetitionDto.number_attendees,
                     //number_attendees = 2^(int.Parse(createCompetitionDto.rounds)),
                 };
 
