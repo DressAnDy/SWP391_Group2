@@ -143,7 +143,7 @@ namespace Service.ICompetitionService
                     .AsQueryable();
 
                 var refereeValidate = competitionQuery
-                    .FirstOrDefaultAsync(c => c.referee_id == updateCompetitionDto.RefereeId && c.status_competition == "Active");
+                    .FirstOrDefault(c => c.referee_id == updateCompetitionDto.RefereeId && c.status_competition == "Active");
 
                 if (refereeValidate != null)
                 {
@@ -157,7 +157,7 @@ namespace Service.ICompetitionService
                 {
                     return NotFound("Competition not found!");
                 }
-                else if (competition.KoiRegistrations.Any() && competition.status_competition == "Active")
+                else if (competition.KoiRegistrations != null && competition.status_competition == "Active")
                 {
                     if(competition.number_attendees != updateCompetitionDto.number_attendees || updateCompetitionDto.StatusCompetition == "Inactive")
                     {
