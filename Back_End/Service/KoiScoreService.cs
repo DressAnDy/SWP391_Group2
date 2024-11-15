@@ -128,6 +128,10 @@ namespace KoiBet.Service
                 {
                     return BadRequest("Referee not authorized!");
                 }
+                else if(compe.status_competition == "Finished")
+                {
+                    return BadRequest("Competition is finished!");
+                }
 
                 var scoreExisted = _context.KoiScore
                     .FirstOrDefault(c => c.koi_id == createKoiScoreDTO.KoiId && c.match_id == createKoiScoreDTO.MatchId);

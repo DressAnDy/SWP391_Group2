@@ -166,6 +166,10 @@ namespace Service.ICompetitionService
                         return BadRequest("Competition is started. Can't update!");
                     }
                 }
+                else if(competition.status_competition == "Finished")
+                {
+                    return BadRequest("Competition is finished. Can't update!");
+                }
 
                 var roundQuery = _context.CompetitionRound
                     .Where(c => c.competition_id == updateCompetitionDto.CompetitionId)
