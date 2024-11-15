@@ -13,7 +13,7 @@ namespace KoiBet.DTO.Competition
 
         public string? KoiCategoryId { get; set; }
 
-        public string? KoiFishId { get; set; }
+        //public string? KoiFishId { get; set; }
 
         public string? RefereeId { get; set; }
 

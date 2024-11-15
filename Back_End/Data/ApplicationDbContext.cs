@@ -68,10 +68,10 @@ namespace KoiBet.Data
                 .WithMany(c => c.Competitions)
                 .HasForeignKey(c => c.category_id);
 
-            modelBuilder.Entity<CompetitionKoi>()
-                .HasOne(c => c.Koi)
-                .WithMany(k => k.Competitions)
-                .HasForeignKey(c => c.koi_id);
+            //modelBuilder.Entity<CompetitionKoi>()
+            //    .HasOne(c => c.Koi)
+            //    .WithMany(k => k.Competitions)
+            //    .HasForeignKey(c => c.koi_id);
 
             modelBuilder.Entity<CompetitionKoi>()
                 .HasOne(c => c.Referee)
@@ -137,6 +137,12 @@ namespace KoiBet.Data
                 .HasOne(b => b.Competition)
                 .WithMany(c => c.Bets)
                 .HasForeignKey(b => b.competition_id);
+
+            modelBuilder.Entity<CompetitionRound>()
+                .HasOne(b => b.CompetitionKoi)
+                .WithMany()
+                .HasForeignKey(b => b.competition_id)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

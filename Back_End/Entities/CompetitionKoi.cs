@@ -24,7 +24,7 @@ namespace KoiBet.Entities
         [Column("category_id")]
         public string category_id { get; set; }
 
-        [Required]
+        
         [Column("koi_id")]
         public string koi_id { get; set; }
 
@@ -46,8 +46,8 @@ namespace KoiBet.Entities
 
         public virtual KoiCategory Category { get; set; }
 
-        [JsonIgnore]
-        public virtual FishKoi Koi { get; set; }
+        //[JsonIgnore]
+        //public virtual FishKoi Koi { get; set; }
 
         public virtual Referee Referee { get; set; }
 
