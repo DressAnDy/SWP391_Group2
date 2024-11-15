@@ -52,5 +52,17 @@ namespace KoiBet.Controllers
         {
             return await _betKoiService.HandleGetUserBets(userId);
         }
+
+        [HttpGet("Get Bet History By UserId")]
+        public async Task<IActionResult> GetBetHistoryByUserId(string userId)
+        {
+            return await _betKoiService.HandleGetBetHistory(userId);
+        }
+
+        [HttpPost("Update Status Bet")]
+        public async Task<IActionResult> UpdateStatusBet([FromBody] string betId, [FromBody] string newStatus)
+        {
+            return await _betKoiService.UpdateBetStatus(betId, newStatus);
+        }
     }
 }
