@@ -185,7 +185,7 @@ namespace Service.ICompetitionService
                             
                         var round = new CompetitionRound
                         {
-                            RoundId = updateCompetitionDto.CompetitionId + "_ROUND_" + (i + 1),
+                            RoundId = updateCompetitionDto.CompetitionId + "_RND_" + (i + 1),
                             competition_id = updateCompetitionDto.CompetitionId,
                             Match = (int)Math.Pow(2, Double.Parse(count)),
                         };
@@ -205,7 +205,7 @@ namespace Service.ICompetitionService
 
                             var round = new CompetitionRound
                             {
-                                RoundId = updateCompetitionDto.CompetitionId + "_ROUND_" + (i + 1),
+                                RoundId = updateCompetitionDto.CompetitionId + "_RND_" + (i + 1),
                                 competition_id = updateCompetitionDto.CompetitionId,
                                 Match = (int)Math.Pow(2, Double.Parse(count)),
                             };
