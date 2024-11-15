@@ -74,24 +74,25 @@ namespace Service.ICompetitionService
             try
             {
                 var competitionQuery = _context.CompetitionKoi
-                    .OrderByDescending(c => c.competition_id)
                     .AsQueryable();
 
                 var refereeValidate = competitionQuery
-                    .FirstOrDefaultAsync(c => c.referee_id == createCompetitionDto.referee_id && c.status_competition == "Active");
+                    .FirstOrDefault(c => c.referee_id == createCompetitionDto.referee_id && c.status_competition == "Active");
 
                 if(refereeValidate != null)
                 {
                     return BadRequest("Referee not available!");
                 }
 
-                var lastCompetition = await competitionQuery.FirstOrDefaultAsync();
+                var lastCompetition = competitionQuery
+                    .OrderByDescending(c => c.competition_id)
+                    .ToList();
 
                 int newIdNumber = 1; // Default ID starts at 1 if no records exist
 
-                if (lastCompetition != null)
+                if (lastCompetition.Count != 0)
                 {
-                    var lastId = lastCompetition.competition_id;
+                    var lastId = lastCompetition[0].competition_id;
                     if (lastId.StartsWith("CPT_"))
                     {
                         int.TryParse(lastId.Substring(4), out newIdNumber); // Increment the ID number after 'CPT_'
@@ -109,7 +110,7 @@ namespace Service.ICompetitionService
                     status_competition = createCompetitionDto.status_competition,
                     rounds = (Math.Log(createCompetitionDto.number_attendees, 2)).ToString(),
                     category_id = createCompetitionDto.category_id,
-                    koi_id = createCompetitionDto.koi_id,
+                    koi_id = "Pending",
                     referee_id = createCompetitionDto.referee_id,
                     award_id = createCompetitionDto.award_id,
                     competition_img = createCompetitionDto.competition_img,
@@ -143,84 +144,98 @@ namespace Service.ICompetitionService
                     .AsQueryable();
 
                 var refereeValidate = competitionQuery
-                    .FirstOrDefault(c => c.referee_id == updateCompetitionDto.RefereeId && c.status_competition == "Active");
+                    .FirstOrDefault(c => c.referee_id == updateCompetitionDto.RefereeId && c.status_competition == "Active" && c.competition_id != updateCompetitionDto.CompetitionId);
 
                 if (refereeValidate != null)
                 {
                     return BadRequest("Referee not available!");
                 }
 
-                var competition = await competitionQuery
-                    .FirstOrDefaultAsync(c => c.competition_id == updateCompetitionDto.CompetitionId);
+                var competition = competitionQuery
+                    .Include(c => c.KoiRegistrations)
+                    .FirstOrDefault(c => c.competition_id == updateCompetitionDto.CompetitionId);
 
                 if (competition == null)
                 {
                     return NotFound("Competition not found!");
                 }
-                else if (competition.KoiRegistrations != null && competition.status_competition == "Active")
+                else if(competition.number_attendees != updateCompetitionDto.number_attendees || updateCompetitionDto.StatusCompetition == "Inactive")
                 {
-                    if(competition.number_attendees != updateCompetitionDto.number_attendees || updateCompetitionDto.StatusCompetition == "Inactive")
+                    if(competition.KoiRegistrations.Count != 0)
                     {
-                        return BadRequest("Competition has already started!");
+                        return BadRequest("Competition is started. Can't update!");
                     }
+                }
+                else if(competition.status_competition == "Finished")
+                {
+                    return BadRequest("Competition is finished. Can't update!");
+                }
+
+                var roundQuery = _context.CompetitionRound
+                    .Where(c => c.competition_id == updateCompetitionDto.CompetitionId)
+                    .AsQueryable();
+
+                var oldRoundList = roundQuery
+                    .OrderBy(c => c.RoundId)
+                    .ToList();
+
+                var roundCount = (Math.Log(updateCompetitionDto.number_attendees, 2)).ToString();
+
+                if (oldRoundList.Count == 0 && updateCompetitionDto.StatusCompetition == "Active")
+                {
+                    for(int i = 0; i < int.Parse(roundCount); i++)
+                    {
+                        var count = (int.Parse(roundCount) - (i + 1)).ToString();
+                            
+                        var round = new CompetitionRound
+                        {
+                            RoundId = updateCompetitionDto.CompetitionId + "_RND_" + (i + 1),
+                            competition_id = updateCompetitionDto.CompetitionId,
+                            Match = (int)Math.Pow(2, Double.Parse(count)),
+                        };
+
+                        _context.CompetitionRound.Add(round);
+                    }
+                }
+                else if(oldRoundList.Count != 0 && updateCompetitionDto.StatusCompetition == "Active")
+                {
+                    if(competition.number_attendees != updateCompetitionDto.number_attendees)
+                    {
+                        _context.CompetitionRound.RemoveRange(oldRoundList);
+
+                        for (int i = 0; i < int.Parse(roundCount); i++)
+                        {
+                            var count = (int.Parse(roundCount) - (i + 1)).ToString();
+
+                            var round = new CompetitionRound
+                            {
+                                RoundId = updateCompetitionDto.CompetitionId + "_RND_" + (i + 1),
+                                competition_id = updateCompetitionDto.CompetitionId,
+                                Match = (int)Math.Pow(2, Double.Parse(count)),
+                            };
+
+                            _context.CompetitionRound.Add(round);
+                        }
+                    }
+                }
+                else if(updateCompetitionDto.StatusCompetition == "Inactive")
+                {
+                    _context.CompetitionRound.RemoveRange(oldRoundList);
                 }
 
                 competition.competition_name = updateCompetitionDto.CompetitionName;
                 competition.competition_description = updateCompetitionDto.CompetitionDescription;
                 competition.status_competition = updateCompetitionDto.StatusCompetition;
                 competition.category_id = updateCompetitionDto.KoiCategoryId;
-                competition.koi_id = updateCompetitionDto.KoiFishId;
                 competition.referee_id = updateCompetitionDto.RefereeId;
                 competition.award_id = updateCompetitionDto.AwardId;
                 competition.competition_img = updateCompetitionDto.CompetitionImg;
                 competition.number_attendees = updateCompetitionDto.number_attendees;
-                competition.rounds = (Math.Log(updateCompetitionDto.number_attendees, 2)).ToString();
-
-                var oldRound = _context.CompetitionRound
-                    .Include(c => c.Matches).ThenInclude(cs => cs.Scores)
-                    .Where(c => c.competition_id == competition.competition_id)
-                    .ToList();
-
-                if (competition.status_competition == "Active")
-                {
-                    if(oldRound.Count != 0)
-                    {
-                        _context.CompetitionRound
-                            .RemoveRange(oldRound);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    for (int i = 1; i <= int.Parse(competition.rounds); i++)
-                    {
-                        var count = (int.Parse(competition.rounds) - i).ToString();
-                        var round = new CompetitionRound
-                        {
-                            RoundId = updateCompetitionDto.CompetitionId + "_RND_" + i,
-                            Match = (int)Math.Pow(2, Double.Parse(count)),
-                            competition_id = competition.competition_id
-                        };
-
-                        _context.CompetitionRound.Add(round);
-                    }
-                }
-                //else
-                //{
-                //    if (oldRound.Count != 0)
-                //    {
-                //        _context.CompetitionRound
-                //            .RemoveRange(oldRound);
-                //        await _context.SaveChangesAsync();
-                //    }
-                //}
+                competition.rounds = roundCount;
 
                 _context.CompetitionKoi.Update(competition);
 
-                var result = await _context.SaveChangesAsync();
-
-                if (result == 0)
-                {
-                    return BadRequest("Failed to update competition!");
-                }
+                _context.SaveChanges();
 
                 return Ok(competition);
             }

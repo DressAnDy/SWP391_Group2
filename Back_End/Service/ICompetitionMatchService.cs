@@ -175,6 +175,7 @@ namespace KoiBet.Service
                 {
                     var winnerId = matchList[0].result.Split('_')[0];
                     currCompe.koi_id = winnerId;
+                    currCompe.status_competition = "Finished";
                     _context.CompetitionKoi.Update(currCompe);
                     _context.SaveChanges();
                     return Ok("Competition finished and the winner is " + winnerId + "!");

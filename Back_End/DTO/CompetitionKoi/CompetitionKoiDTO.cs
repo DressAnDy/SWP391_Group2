@@ -28,7 +28,7 @@ namespace KoiBet.DTO.Competition
 
         public KoiCategory? Category { get; set; }
 
-        public KoiFishDTO? Koi { get; set; }
+        //public KoiFishDTO? Koi { get; set; }
 
         public Referee? Referee { get; set; }
 
@@ -36,7 +36,7 @@ namespace KoiBet.DTO.Competition
 
         public KoiStandard? KoiStandard { get; set; }
         public List<KoiRegistration>? KoiRegistrations { get; set; }
-        public FishKoi FishKoi { get; set; }
+        //public FishKoi FishKoi { get; set; }
         public List<BetKoi>? Bets { get; set; }
         public string? competition_img { get; set; }
     }
