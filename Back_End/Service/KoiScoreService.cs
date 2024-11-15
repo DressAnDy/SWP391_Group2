@@ -129,6 +129,17 @@ namespace KoiBet.Service
                     return BadRequest("Referee not authorized!");
                 }
 
+                var scoreExisted = _context.KoiScore
+                    .FirstOrDefault(c => c.koi_id == createKoiScoreDTO.KoiId && c.match_id == createKoiScoreDTO.MatchId);
+
+                if(scoreExisted != null)
+                {
+                    scoreExisted.score_koi = createKoiScoreDTO.Score;
+                    _context.Update(scoreExisted);
+                    _context.SaveChanges();
+                    return Ok("Score existed and updated!");
+                }
+
                 var roundValidateArray = createKoiScoreDTO.MatchId.Split('_');
 
                 var matchValidate = matchQuery
