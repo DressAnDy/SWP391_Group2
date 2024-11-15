@@ -115,6 +115,9 @@ namespace KoiBet.Service
         {
             try
             {
+                var matchQuery = _context.CompetitionMatch
+                    .AsQueryable();
+
                 var referee = await _context.Referee
                     .FirstOrDefaultAsync(c => c.user_id == refereeId);
 
@@ -124,6 +127,16 @@ namespace KoiBet.Service
                 if(compe != null && compe.referee_id != referee.RefereeId)
                 {
                     return BadRequest("Referee not authorized!");
+                }
+
+                var roundValidateArray = createKoiScoreDTO.MatchId.Split('_');
+
+                var matchValidate = matchQuery
+                    .FirstOrDefault(c => c.match_id.Contains(roundValidateArray[0] + "_" + roundValidateArray[1] + "_" + roundValidateArray[2] + "_" + (int.Parse(roundValidateArray[3]) + 1)));
+
+                if(matchValidate != null)
+                {
+                    return BadRequest("Match already finished!");
                 }
 
                 var lastScore = await _context.KoiScore
@@ -156,7 +169,7 @@ namespace KoiBet.Service
 
 
 
-                var match = _context.CompetitionMatch
+                var match = matchQuery
                     .FirstOrDefault(c => c.match_id == createKoiScoreDTO.MatchId);
 
                 if(match.result == "Pending")
