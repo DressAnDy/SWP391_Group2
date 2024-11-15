@@ -145,13 +145,44 @@ namespace KoiBet.Service
         {
             try
             {
-                var matchList = _context.CompetitionMatch
+                var compeQuery = _context.CompetitionKoi
+                    .AsQueryable();
+
+                var currCompe = compeQuery
+                    .FirstOrDefault(c => c.competition_id == processingMatchDto.CompetitionId);
+
+                var matchQuery = _context.CompetitionMatch
+                    .OrderByDescending(m => m.match_id)
+                    .AsQueryable();
+
+                var resultValidate = matchQuery
+                    .FirstOrDefault(c => c.result.Contains("Pending") && c.match_id.Contains(currCompe.competition_id));
+
+                if (resultValidate != null)
+                {
+                    return BadRequest("Round not finished!");
+                }
+
+                var matchList = matchQuery
+                    .OrderByDescending(m => m.match_id)
                     .Include(c => c.Round)
-                    .Where(m => m.round_id == processingMatchDto.RoundId)
+                    .Where(m => m.round_id.Contains(currCompe.competition_id))
                     .ToList();
 
                 List<string> id = matchList[0].match_id.Split('_').ToList();
-                var newId = id[0] + "_" + id[1] + "_" + id[2] + "_" + (int.Parse(id[3]) + 1);
+
+                if (id[3] == currCompe.rounds)
+                {
+                    var winnerId = matchList[0].result.Split('_')[0];
+                    currCompe.koi_id = winnerId;
+                    _context.CompetitionKoi.Update(currCompe);
+                    _context.SaveChanges();
+                    return Ok("Competition finished and the winner is " + winnerId + "!");
+                }
+
+                var currRound = int.Parse(id[3]);
+
+                var newId = id[0] + "_" + id[1] + "_" + id[2] + "_" + (currRound + 1);
 
                 var koiList = new List<string>();
 

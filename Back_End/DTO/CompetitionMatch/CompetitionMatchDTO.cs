@@ -32,6 +32,6 @@ namespace KoiBet.DTO
 
     public class ProcessingMatchDTO
     {
-        public string RoundId { get; set; }
+        public string CompetitionId { get; set; }
     }
 }
