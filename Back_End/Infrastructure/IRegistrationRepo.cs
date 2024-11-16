@@ -2,6 +2,7 @@
 using KoiBet.DTO;
 using KoiBet.DTO.Competition;
 using KoiBet.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.Transactions;
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
@@ -52,8 +53,14 @@ public class RegistrationRepo : IRegistrationRepo
         var regisQuery = _context.KoiRegistration
             .AsQueryable();
 
+        var winnerKoi = _context.FishKoi
+            .FirstOrDefault(c => c.koi_name == koiRegistrationId);
+
+        var winnerRegis = _context.KoiRegistration
+            .FirstOrDefault(c => c.koi_id == winnerKoi.koi_id);
+
         var regisList = regisQuery
-            .Where(c => c.competition_id == koiRegistrationId)
+            .Where(c => c.competition_id == winnerRegis.competition_id)
             .OrderBy(c => c.RegistrationId)
             .ToList();
 
@@ -63,6 +70,7 @@ public class RegistrationRepo : IRegistrationRepo
         foreach (var regis in regisList)
         {
             var betList = betQuery
+                .Include(c => c.User)
                 .Where(c => c.registration_id == regis.RegistrationId)
                 .ToList();
 
@@ -70,7 +78,7 @@ public class RegistrationRepo : IRegistrationRepo
             {
                 if (bet.bet_status == "Pending")
                 {
-                    if (bet.registration_id == koiRegistrationId)
+                    if (bet.registration_id == winnerRegis.RegistrationId)
                     {
                         bet.bet_status = "Win";
                         bet.payout_date = DateTime.Now;
