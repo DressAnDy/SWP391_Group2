@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Service.ICompetitionService;
 using Service.KoiFishService;
 using KoiBet.Infrastructure;
+using System.Runtime.InteropServices;
 
 namespace KoiBet.Service
 {
@@ -87,14 +88,20 @@ namespace KoiBet.Service
         {
             try
             {
-                var regisValidate = await _context.KoiRegistration
-                    .Where(c => c.koi_id == createKoiRegistrationDto.KoiId)
-                    .ToListAsync();
+                var regisQuery = _context.KoiRegistration
+                    .AsQueryable();
 
-                foreach(var regis in regisValidate)
+                var compeQuery = _context.CompetitionKoi
+                    .AsQueryable();
+
+                var regisValidate = regisQuery
+                    .Where(c => c.koi_id == createKoiRegistrationDto.KoiId)
+                    .ToList();
+
+                foreach (var regis in regisValidate)
                 {
-                    var compe = await _context.CompetitionKoi
-                        .FirstOrDefaultAsync(c => c.competition_id == regis.competition_id);
+                    var compe = compeQuery
+                        .FirstOrDefault(c => c.competition_id == regis.competition_id);
 
                     if(compe != null)
                     {
@@ -102,12 +109,28 @@ namespace KoiBet.Service
                         {
                             return BadRequest("Already in a competition!");
                         }
+                        else if(compe.competition_id == createKoiRegistrationDto.CompetitionId)
+                        {
+                            return BadRequest("Already in this competition!");
+                        }
                     }
                 }
 
-                var lastRegistration = await _context.KoiRegistration
+                var compeValidate = compeQuery
+                    .FirstOrDefault(c => c.competition_id == createKoiRegistrationDto.CompetitionId);
+
+                if(compeValidate == null)
+                {
+                    return BadRequest("Competition not found!");
+                }
+                else if(compeValidate.status_competition != "Active")
+                {
+                    return BadRequest("Competition is not available!");
+                }
+
+                var lastRegistration = regisQuery
                     .OrderByDescending(r => r.RegistrationId)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefault();
 
                 int newIdNumber = 1; // Mặc định ID bắt đầu từ 1 nếu không có bản ghi nào
 
@@ -159,28 +182,21 @@ namespace KoiBet.Service
                     .Where(c => c.competition_id ==  updateKoiRegistrationDto.CompetitionId)
                     .AsQueryable();
 
-                // Validate input
-                if (updateKoiRegistrationDto == null)
-                {
-                    _logger.LogWarning("UpdateKoiRegistrationDTO is null");
-                    return BadRequest("Invalid input data");
-                }
-
                 // Kiểm tra registration tồn tại
-                var registration = await _context.KoiRegistration
+                var registration = registrationQuery
                     .Include(c => c.FishKoi)
-                    .FirstOrDefaultAsync(r => r.RegistrationId == updateKoiRegistrationDto.RegistrationId);
+                    .FirstOrDefault(r => r.RegistrationId == updateKoiRegistrationDto.RegistrationId);
 
                 if (registration == null)
                 {
-                    _logger.LogWarning($"Registration not found with ID: {updateKoiRegistrationDto.RegistrationId}");
                     return NotFound("Koi registration not found!");
                 }
 
                 // Đếm số lượng attendees
-                var attendeesCount = await registrationQuery
+                var attendeesCount = registrationQuery
                     .Where(c => c.StatusRegistration == "Accepted")
-                    .CountAsync();  // Sử dụng CountAsync thay vì ToList
+                    .ToList()
+                    .Count();  // Sử dụng CountAsync thay vì ToList
 
                 if (!string.IsNullOrEmpty(updateKoiRegistrationDto.CompetitionId))
                 {
