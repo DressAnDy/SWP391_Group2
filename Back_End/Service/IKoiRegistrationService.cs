@@ -21,6 +21,7 @@ namespace KoiBet.Service
         Task<IActionResult> HandleGetKoiRegistration(string registrationId);
         Task<IActionResult> HandleGetKoiRegistrationByKoiId(string registrationId);
         Task<IActionResult> HandleGetKoiRegistrationByCompetitionId(string competitionId);
+        Task<IActionResult> HandleGetKoiRegistrationByUserId(string userId);
     }
 
     public class KoiRegistrationService : ControllerBase, IKoiRegistrationService
@@ -351,6 +352,30 @@ namespace KoiBet.Service
                         koicategory = r.KoiCategory,
                     })
                     .FirstOrDefaultAsync(r => r.KoiId == koiId);
+
+                if (registration == null)
+                {
+                    return NotFound("Koi registration not found!");
+                }
+
+                return Ok(registration);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving koi registration");
+                return BadRequest($"Error retrieving koi registration: {ex.Message}");
+            }
+        }
+
+        // Get a specific KoiRegistration by UserID
+        public async Task<IActionResult> HandleGetKoiRegistrationByUserId(string userId)
+        {
+            try
+            {
+                var registration = _context.KoiRegistration
+                    .Include(c => c.FishKoi).ThenInclude(cb => cb.User)
+                    .Include(c => c.Bets)
+                    .Where(r => r.FishKoi.users_id == userId);
 
                 if (registration == null)
                 {

@@ -39,6 +39,12 @@ namespace KoiBet.Controllers
             return await _koiRegistrationService.HandleGetKoiRegistrationByCompetitionId(competitionId);
         }
 
+        [HttpGet("Get KoiRegistrationByUserId")]
+        public async Task<IActionResult> GetKoiRegistrationByUserId([FromQuery] string userId)
+        {
+            return await _koiRegistrationService.HandleGetKoiRegistrationByUserId(userId);
+        }
+
         [HttpDelete("Delete KoiRegistration")]
         public async Task<IActionResult> DeleteAward(string koiRegistrationId)
         {
