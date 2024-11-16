@@ -11,6 +11,8 @@ namespace KoiBet.DTO
         public string user_id { get; set; }
         public UserDTO User { get; set; }
 
+        public string bet_status { get; set; }
+
         [JsonIgnore]
         public string competition_id { get; set; }
         public decimal bet_amount { get; set; }

@@ -19,9 +19,10 @@
             Task<IActionResult> HandleDeleteBet(string betId);
             Task<IActionResult> HandleGetBet(string betId);
             Task<IActionResult> HandleGetAllBet();
+            Task<IActionResult> HandleGetBetHistory(string userId);
+            Task<IActionResult> UpdateBetStatus(string betId, string newStatus);
         }
 
-        // BetKoiService Implementation
         public class KoiBetService : ControllerBase, IBetKoiService
         {
             private readonly ApplicationDbContext _context;
@@ -31,111 +32,39 @@
                 _context = context;
             }
 
-        // Đặt cược mới
-        //public async Task<IActionResult> HandlePlaceBet(CreateBetDTO createBetDto)
-        //{
-        //    try
-        //    {
-        //        // Lấy thông tin người dùng
-        //        var user = await _context.Users
-        //            .FirstOrDefaultAsync(u => u.user_id == createBetDto.UserId);
 
-        //        if (user == null)
-        //        {
-        //            return BadRequest("User not found.");
-        //        }
+        public async Task<IActionResult> UpdateBetStatus(string betId, string newStatus)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(betId) || string.IsNullOrEmpty(newStatus))
+                {
+                    return BadRequest("Invalid betId or status.");
+                }
 
-        //        // Kiểm tra số dư
-        //        if (user.Balance < createBetDto.BetAmount)
-        //        {
-        //            return BadRequest("Insufficient balance.");
-        //        }
+                var bet = await _context.KoiBet.FirstOrDefaultAsync(b => b.bet_id.Equals(betId));
+                if (bet == null)
+                {
+                    return NotFound("Bet not found.");
+                }
 
-        //        // Lấy thông tin đăng ký koi
-        //        var registration = await _context.KoiRegistration
-        //            .FirstOrDefaultAsync(r => r.koi_id == createBetDto.KoiId);
+                bet.bet_status = newStatus;
 
-        //        if (registration == null)
-        //        {
-        //            return BadRequest("Registration not found.");
-        //        }
+                _context.KoiBet.Update(bet);
+                await _context.SaveChangesAsync();
 
-        //        // Tiếp tục xử lý như cũ
-        //        var match = await _context.CompetitionMatch
-        //            .Include(m => m.Round)
-        //                .ThenInclude(r => r.CompetitionKoi)
-        //            .FirstOrDefaultAsync(m => m.match_id == createBetDto.MatchId);
-
-        //        if (match == null || match.Round == null || match.Round.CompetitionKoi == null)
-        //        {
-        //            return BadRequest("Match or associated competition not found.");
-        //        }
-
-        //        var competitionId = match.Round.CompetitionKoi.competition_id;
-
-        //        // Tạo mã Bet mới
-        //        var lastBet = await _context.KoiBet
-        //            .OrderByDescending(b => b.bet_id)
-        //            .FirstOrDefaultAsync();
-
-        //        int newBetNumber = 1;
-        //        if (lastBet != null && lastBet.bet_id.StartsWith("Bet_"))
-        //        {
-        //            int.TryParse(lastBet.bet_id.Substring(4), out newBetNumber);
-        //            newBetNumber++;
-        //        }
-
-        //        string newBetId = $"Bet_{newBetNumber}";
-
-        //        // Kiểm tra đối tượng BetKoi đã tồn tại trong DbContext
-        //        var existingBet = _context.KoiBet.Local.FirstOrDefault(b => b.bet_id == newBetId);
-        //        if (existingBet != null)
-        //        {
-        //            // Tách đối tượng cũ ra khỏi DbContext
-        //            _context.Entry(existingBet).State = EntityState.Detached;
-        //        }
-
-        //        // Tạo đối tượng Bet mới
-        //        var bet = new BetKoi()
-        //        {
-        //            bet_id = newBetId,
-        //            users_id = createBetDto.UserId,
-        //            registration_id = registration.RegistrationId, // sử dụng registration_id từ KoiRegistration
-        //            competition_id = competitionId,
-        //            bet_amount = createBetDto.BetAmount
-        //        };
-
-        //        // Trừ số tiền đặt cược từ số dư của người dùng
-        //        user.Balance -= createBetDto.BetAmount;
-
-        //        // Lưu thay đổi vào cơ sở dữ liệu
-        //        _context.KoiBet.Add(bet);
-        //        await _context.SaveChangesAsync();
-
-        //        return Ok(new
-        //        {
-        //            BetId = bet.bet_id,
-        //            UserId = bet.users_id,
-        //            MatchId = createBetDto.MatchId,
-        //            KoiId = createBetDto.KoiId,
-        //            RegistrationId = registration.RegistrationId,
-        //            CompetitionId = competitionId,
-        //            BetAmount = bet.bet_amount
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Xử lý lỗi nếu có
-        //        return StatusCode(500, $"Error occurred: {ex.Message}");
-        //    }
-        //}
-
+                return Ok("Bet status updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error occurred: {ex.Message}");
+            }
+        }
 
         public async Task<IActionResult> HandlePlaceBet(CreateBetDTO createBetDto)
         {
             try
             {
-                // Lấy thông tin người dùng
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.user_id == createBetDto.UserId);
 
@@ -177,11 +106,9 @@
 
                 string newBetId = $"Bet_{newBetNumber}";
 
-                // Kiểm tra đối tượng BetKoi đã tồn tại trong DbContext
                 var existingBet = _context.KoiBet.Local.FirstOrDefault(b => b.bet_id == newBetId);
                 if (existingBet != null)
                 {
-                    // Tách đối tượng cũ ra khỏi DbContext
                     _context.Entry(existingBet).State = EntityState.Detached;
                 }
 
@@ -192,7 +119,8 @@
                     users_id = createBetDto.UserId,
                     registration_id = createBetDto.RegistrationId,
                     competition_id = competitionId,
-                    bet_amount = createBetDto.BetAmount
+                    bet_amount = createBetDto.BetAmount,
+                    bet_status = "Pending"
                 };
 
                 // Trừ số tiền đặt cược từ số dư của người dùng
@@ -214,7 +142,6 @@
             }
             catch (Exception ex)
             {
-                // Xử lý lỗi nếu có
                 return StatusCode(500, $"Error occurred: {ex.Message}");
             }
         }
@@ -279,9 +206,6 @@
                 return Ok(userBets);
             }
 
-        // Lấy thông tin chi tiết của một cược
-
-        //Điều chỉnh khi get lấy thêm koi_id
         public async Task<IActionResult> HandleGetBet(string betId)
         {
             try
@@ -338,6 +262,94 @@
                 return BadRequest($"Error retrieving bet: {ex.Message}");
             }
         }
+
+        public async Task<IActionResult> HandleGetBetHistory(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return BadRequest("UserId is required.");
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.user_id == userId);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+
+                var userBets = await _context.KoiBet
+                    .Where(b => b.users_id == userId)
+                    .Select(b => new
+                    {
+                        BetId = b.bet_id,
+                        BetAmount = b.bet_amount,
+                        Status = b.bet_status,
+                        CompetitionId = b.competition_id,
+                        RegistrationId = b.registration_id,
+                        BetDate = b.created_at,
+                        PayoutDate = b.payout_date,
+                        InitialBalance = user.Balance
+                    })
+                    .OrderByDescending(b => b.BetDate)
+                    .ToListAsync();
+
+                if (userBets == null || userBets.Count == 0)
+                {
+                    return NotFound("No bet history found for the user.");
+                }
+
+                decimal? currentBalance = user.Balance;
+                var betHistory = new List<object>();
+
+                foreach (var bet in userBets)
+                {
+                    // Cập nhật số dư theo trạng thái của cược
+                    if (bet.Status == "win")
+                    {
+                        currentBalance += bet.BetAmount + (bet.BetAmount * 0.80m);
+                    }
+                    else if (bet.Status == "lose")
+                    {
+                        currentBalance -= bet.BetAmount; // thua => trừ số tiền cược
+                    }
+
+                    // Thêm thông tin cược vào lịch sử cược
+                    betHistory.Add(new
+                    {
+                        BetId = bet.BetId,
+                        BetAmount = bet.BetAmount,
+                        Status = bet.Status,
+                        CompetitionId = bet.CompetitionId,
+                        RegistrationId = bet.RegistrationId,
+                        BetDate = bet.BetDate,
+                        PayoutDate = bet.PayoutDate,
+                        CurrentBalance = currentBalance
+                    });
+                }
+
+                user.Balance = currentBalance;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(betHistory);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error occurred: {ex.Message}");
+            }
+        }
+
+
+        
+
+
+
+
+
+
+
+
 
         // Cập nhật cược
         public async Task<IActionResult> HandleUpdateBet(UpdateBetDTO updateBetDto)

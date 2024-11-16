@@ -21,6 +21,12 @@ namespace KoiBet.Entities
 
         public decimal bet_amount { get; set; }
 
+        public string bet_status { get; set; }
+
+        public DateTime created_at { get; set; }
+
+        public DateTime payout_date { get; set; }
+
         [JsonIgnore]
         public virtual Users User { get; set; }
         [JsonIgnore]
