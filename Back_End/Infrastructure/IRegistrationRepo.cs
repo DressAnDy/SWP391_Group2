@@ -2,6 +2,8 @@
 using KoiBet.DTO;
 using KoiBet.DTO.Competition;
 using KoiBet.Entities;
+using System.Transactions;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace KoiBet.Infrastructure;
 
@@ -30,7 +32,7 @@ public class RegistrationRepo : IRegistrationRepo
                     .ToList()
                     .Count();
 
-        var match = new CompetitionMatch 
+        var match = new CompetitionMatch
         {
             match_id = roundId + "_MATCH_" + (matchCount + 1),
             round_id = roundId,
@@ -58,17 +60,17 @@ public class RegistrationRepo : IRegistrationRepo
         var betQuery = _context.KoiBet
             .AsQueryable();
 
-        foreach(var regis in regisList)
+        foreach (var regis in regisList)
         {
             var betList = betQuery
                 .Where(c => c.registration_id == regis.RegistrationId)
                 .ToList();
 
-            foreach(var bet in betList)
+            foreach (var bet in betList)
             {
-                if(bet.bet_status == "Pending")
+                if (bet.bet_status == "Pending")
                 {
-                    if(bet.registration_id == koiRegistrationId)
+                    if (bet.registration_id == koiRegistrationId)
                     {
                         bet.bet_status = "Win";
                         bet.payout_date = DateTime.Now;
@@ -77,6 +79,19 @@ public class RegistrationRepo : IRegistrationRepo
                         var user = bet.User;
                         user.Balance += (bet.bet_amount * 2);
                         _context.Users.Update(user);
+
+                        var newTranId = Guid.NewGuid().ToString();
+                        var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
+
+                        var transaction = new Transactions
+                        {
+                            transactions_id = hashedTranId,
+                            users_id = user.user_id,
+                            Amount = +(bet.bet_amount * 2),
+                            messages = "Win bet",
+                            transactions_time = DateTime.Now
+                        };
+                        _context.Transactions.Add(transaction);
                     }
                     else
                     {
@@ -84,15 +99,46 @@ public class RegistrationRepo : IRegistrationRepo
                         bet.payout_date = DateTime.Now;
                         _context.KoiBet.Update(bet);
 
-                        var manager = _context.Users
-                            .FirstOrDefault(c => c.role_id == "R4");
+                        betPot += bet.bet_amount;
 
-                        manager.Balance += bet.bet_amount;
-                        _context.Users.Update(manager);
+                        var newTranId = Guid.NewGuid().ToString();
+                        var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
+
+                        var transactionUser = new Transactions
+                        {
+                            transactions_id = hashedTranId,
+                            users_id = bet.users_id,
+                            Amount = -bet.bet_amount,
+                            messages = "Lose bet",
+                            transactions_time = DateTime.Now
+                        };
+                        _context.Transactions.Add(transactionUser);
                     }
                 }
             }
+
+            regis.StatusRegistration = "Finished";
+            _context.KoiRegistration.Update(regis);
         }
+
+        var admin = _context.Users
+            .FirstOrDefault(c => c.role_id == "R5");
+
+        admin.Balance += betPot;
+        _context.Users.Update(admin);
+
+        var newTranId2 = Guid.NewGuid().ToString();
+        var hashedTranId2 = BCrypt.Net.BCrypt.HashPassword(newTranId2).Substring(0, 50);
+
+        var transactionAdmin = new Transactions
+        {
+            transactions_id = hashedTranId2,
+            users_id = admin.user_id,
+            Amount = -betPot,
+            messages = "Process bet",
+            transactions_time = DateTime.Now
+        };
+        _context.Transactions.Add(transactionAdmin);
 
         return _context.SaveChanges();
     }

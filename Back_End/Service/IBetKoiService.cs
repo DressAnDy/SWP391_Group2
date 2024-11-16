@@ -144,6 +144,20 @@ namespace Service.IBetKoiService
 
                 // Lưu thay đổi vào cơ sở dữ liệu
                 _context.KoiBet.Add(bet);
+
+                var newTranId = Guid.NewGuid().ToString();
+                var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
+
+                var transaction = new Transactions
+                {
+                    transactions_id = hashedTranId,
+                    users_id = createBetDto.UserId,
+                    Amount = -createBetDto.BetAmount,
+                    messages = "Place bet",
+                    transactions_time = DateTime.Now
+                };
+                _context.Transactions.Add(transaction);
+
                 await _context.SaveChangesAsync();
 
                 return Ok(new
@@ -393,11 +407,39 @@ namespace Service.IBetKoiService
                     return BadRequest("You don't have enough balance.");
                 }
                 user.Balance -= amountDiff;
+
+                var newTranId = Guid.NewGuid().ToString();
+                var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
+
+                var transaction = new Transactions
+                {
+                    transactions_id = hashedTranId,
+                    users_id = user.user_id,
+                    Amount = -amountDiff,
+                    messages = "Update bet",
+                    transactions_time = DateTime.Now
+                };
+
+                _context.Transactions.Add(transaction);
             }
             else if(updateBetDto.BetAmount < bet.bet_amount)
             {
                 var amountDiff = bet.bet_amount - updateBetDto.BetAmount;
                 user.Balance += amountDiff;
+
+                var newTranId = Guid.NewGuid().ToString();
+                var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
+
+                var transaction = new Transactions
+                {
+                    transactions_id = hashedTranId,
+                    users_id = user.user_id,
+                    Amount = +amountDiff,
+                    messages = "Update bet",
+                    transactions_time = DateTime.Now
+                };
+
+                _context.Transactions.Add(transaction);
             }
 
             bet.bet_amount = updateBetDto.BetAmount;
