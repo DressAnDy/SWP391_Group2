@@ -65,7 +65,6 @@
         {
             try
             {
-                // Lấy thông tin người dùng
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.user_id == createBetDto.UserId);
 
@@ -143,7 +142,6 @@
             }
             catch (Exception ex)
             {
-                // Xử lý lỗi nếu có
                 return StatusCode(500, $"Error occurred: {ex.Message}");
             }
         }
@@ -341,6 +339,16 @@
                 return StatusCode(500, $"Error occurred: {ex.Message}");
             }
         }
+
+
+        
+
+
+
+
+
+
+
 
 
         // Cập nhật cược

@@ -60,7 +60,7 @@ namespace KoiBet.Controllers
         }
 
         [HttpPost("Update Status Bet")]
-        public async Task<IActionResult> UpdateStatusBet([FromBody] string betId, [FromBody] string newStatus)
+        public async Task<IActionResult> UpdateStatusBet([FromQuery] string betId, [FromQuery] string newStatus)
         {
             return await _betKoiService.UpdateBetStatus(betId, newStatus);
         }
