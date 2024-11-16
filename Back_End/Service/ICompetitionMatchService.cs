@@ -1,6 +1,7 @@
 ﻿using KoiBet.Data;
 using KoiBet.DTO;
 using KoiBet.Entities;
+using KoiBet.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,10 +21,12 @@ namespace KoiBet.Service
     public class CompetitionMatchService : ControllerBase, ICompetitionMatchService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IRegistrationRepo _repo;
 
         public CompetitionMatchService(ApplicationDbContext context)
         {
             _context = context;
+            _repo = new RegistrationRepo(context);
         }
 
         // Get all Matches
@@ -173,12 +176,17 @@ namespace KoiBet.Service
 
                 if (id[3] == currCompe.rounds)
                 {
-                    var winnerId = matchList[0].result.Split('_')[0];
-                    currCompe.koi_id = winnerId;
+                    var winnerName = matchList[0].result.Split('_')[0];
+                    currCompe.koi_id = winnerName;
                     currCompe.status_competition = "Finished";
                     _context.CompetitionKoi.Update(currCompe);
                     _context.SaveChanges();
-                    return Ok("Competition finished and the winner is " + winnerId + "!");
+                    var betResult = _repo.ProcessingBet(winnerName);
+                    if(betResult != null && betResult == 0)
+                    {
+                        return BadRequest("Failed to process bet!");
+                    }
+                    return Ok("Competition finished and the winner is " + winnerName + "!");
                 }
 
                 var currRound = int.Parse(id[3]);
@@ -189,8 +197,11 @@ namespace KoiBet.Service
 
                 for(int i = 0; i < matchList.Count; i++)
                 {
-                    var processKoi = matchList[i].result.Split('_')[0];
-                    koiList.Add(processKoi);
+                    var processKoiName = matchList[i].result.Split('_')[0];
+                    var processKoi = _context.FishKoi
+                        .FirstOrDefault(f => f.koi_name == processKoiName);
+
+                    koiList.Add(processKoi.koi_id);
                 }
 
                 for(int i = 0; i < koiList.Count; i++)

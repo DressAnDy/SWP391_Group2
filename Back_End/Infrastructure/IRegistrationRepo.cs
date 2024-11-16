@@ -8,6 +8,7 @@ namespace KoiBet.Infrastructure;
 public interface IRegistrationRepo
 {
     public int GenerateCompetitionMatch(KoiRegistration firstKoi, KoiRegistration secondKoi, string compeId);
+    public int ProcessingBet(string koiRegistrationId);
 
 }
 
@@ -39,6 +40,60 @@ public class RegistrationRepo : IRegistrationRepo
         };
 
         _context.CompetitionMatch.Add(match);
+        return _context.SaveChanges();
+    }
+
+    public int ProcessingBet(string koiRegistrationId)
+    {
+        decimal betPot = 0;
+
+        var regisQuery = _context.KoiRegistration
+            .AsQueryable();
+
+        var regisList = regisQuery
+            .Where(c => c.competition_id == koiRegistrationId)
+            .OrderBy(c => c.RegistrationId)
+            .ToList();
+
+        var betQuery = _context.KoiBet
+            .AsQueryable();
+
+        foreach(var regis in regisList)
+        {
+            var betList = betQuery
+                .Where(c => c.registration_id == regis.RegistrationId)
+                .ToList();
+
+            foreach(var bet in betList)
+            {
+                if(bet.bet_status == "Pending")
+                {
+                    if(bet.registration_id == koiRegistrationId)
+                    {
+                        bet.bet_status = "Win";
+                        bet.payout_date = DateTime.Now;
+                        _context.KoiBet.Update(bet);
+
+                        var user = bet.User;
+                        user.Balance += (bet.bet_amount * 2);
+                        _context.Users.Update(user);
+                    }
+                    else
+                    {
+                        bet.bet_status = "Lose";
+                        bet.payout_date = DateTime.Now;
+                        _context.KoiBet.Update(bet);
+
+                        var manager = _context.Users
+                            .FirstOrDefault(c => c.role_id == "R4");
+
+                        manager.Balance += bet.bet_amount;
+                        _context.Users.Update(manager);
+                    }
+                }
+            }
+        }
+
         return _context.SaveChanges();
     }
 }
