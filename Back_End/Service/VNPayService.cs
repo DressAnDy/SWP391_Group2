@@ -56,7 +56,28 @@ public class VnPayService : ControllerBase, IVNPayService
 
             var user = _context.Users.FirstOrDefault(c => c.user_id == userId);
 
-            var vnpReturnUrl = $"http://localhost:5173/member/payment"; ; 
+            var vnpReturnUrl = $"http://localhost:5173/member/payment"; ;
+
+            RandomNumberGenerator rng = RandomNumberGenerator.Create();
+            byte[] buffer = new byte[10];
+            rng.GetBytes(buffer);
+
+            string chuoi = "";
+            for (int i = 0; i < 10; i++)
+            {
+                char kyTu;
+                if (buffer[i] % 2 == 0)
+                {
+                    // Chọn chữ cái ngẫu nhiên
+                    kyTu = (char)('a' + buffer[i] % 26);
+                }
+                else
+                {
+                    // Chọn số ngẫu nhiên
+                    kyTu = (char)('0' + buffer[i] % 10);
+                }
+                chuoi += kyTu;
+            }
 
             _vnPayRepo.AddRequestData("vnp_Version", _vnpVersion);
             _vnPayRepo.AddRequestData("vnp_Command", _vnpCommand);
@@ -69,7 +90,7 @@ public class VnPayService : ControllerBase, IVNPayService
             _vnPayRepo.AddRequestData("vnp_OrderInfo", user.Username);
             _vnPayRepo.AddRequestData("vnp_OrderType", "other"); //default value: other
             _vnPayRepo.AddRequestData("vnp_ReturnUrl", vnpReturnUrl);
-            _vnPayRepo.AddRequestData("vnp_TxnRef", user.Username + (vnPayRequestDTO.Amount * 100).ToString());
+            _vnPayRepo.AddRequestData("vnp_TxnRef", chuoi);
 
             var paymentUrl = _vnPayRepo.CreateRequestUrl(_vnpBaseUrl, _vnpHashSecret);
 
