@@ -101,20 +101,25 @@ namespace KoiBet.Service
 
                 foreach (var regis in regisValidate)
                 {
-                    var compe = compeQuery
-                        .FirstOrDefault(c => c.competition_id == regis.competition_id);
-
-                    if(compe != null)
+                    if(regis.StatusRegistration == "Accepted" || regis.StatusRegistration == "Pending")
                     {
-                        if (compe.status_competition == "Active" && regis.StatusRegistration == "Accepted")
-                        {
-                            return BadRequest("Already in a competition!");
-                        }
-                        else if(compe.competition_id == createKoiRegistrationDto.CompetitionId)
-                        {
-                            return BadRequest("Already in this competition!");
-                        }
+                        return BadRequest("Already registered for a competition!");
                     }
+
+                    //var compe = compeQuery
+                    //    .FirstOrDefault(c => c.competition_id == regis.competition_id);
+
+                    //if(compe != null)
+                    //{
+                    //    if (compe.status_competition == "Active" && regis.StatusRegistration == "Accepted")
+                    //    {
+                    //        return BadRequest("Already in a competition!");
+                    //    }
+                    //    else if(compe.competition_id == createKoiRegistrationDto.CompetitionId)
+                    //    {
+                    //        return BadRequest("Already in this competition!");
+                    //    }
+                    //}
                 }
 
                 var compeValidate = compeQuery

@@ -125,7 +125,14 @@ public class RegistrationRepo : IRegistrationRepo
                 }
             }
 
-            regis.StatusRegistration = "Finished";
+            if(regis.RegistrationId == winnerRegis.RegistrationId)
+            {
+                regis.StatusRegistration = "Win";
+            }
+            else
+            {
+                regis.StatusRegistration = "Lose";
+            }
             _context.KoiRegistration.Update(regis);
         }
 
