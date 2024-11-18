@@ -109,16 +109,12 @@ public class VnPayService : ControllerBase, IVNPayService
             user.Balance += vnPayProcessDTO.Amount;
             _context.Users.Update(user);
 
-            var random = new Random();
-            var id = 0;
-            for (int i = 0; i < 8; i++)
-            {
-                id = id * 10 + random.Next(10);
-            }
+            var newTranId = Guid.NewGuid().ToString();
+            var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
 
             var transaction = new Transactions
             {
-                transactions_id = id.ToString(),
+                transactions_id = hashedTranId,
                 users_id = user.user_id,
                 Amount = vnPayProcessDTO.Amount,
                 transactions_time = DateTime.Now,
