@@ -31,7 +31,7 @@ public class KoiScoreController : ControllerBase
 
     [Authorize]
     [HttpGet("Get KoiScore By RefereeId")]
-    public async Task<IActionResult> GetKoiScoreByRefereeId(string competitionId)
+    public async Task<IActionResult> GetKoiScoreByRefereeId()
     {
         var currentUser = HttpContext.User;
         var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
@@ -43,7 +43,7 @@ public class KoiScoreController : ControllerBase
             return BadRequest(new { message = "Unauthorized!" });
         }
 
-        return await _koiScoreService.HandleGetKoiScoreByRefereeId(currentUserId, competitionId);
+        return await _koiScoreService.HandleGetKoiScoreByRefereeId(currentUserId);
     }
 
     [Authorize]
@@ -63,22 +63,32 @@ public class KoiScoreController : ControllerBase
         return await _koiScoreService.HandleCreateKoiScore(currentUserId, createKoiScoreDTO);
     }
 
-    //[Authorize]
-    //[HttpGet("Update KoiScore")]
-    //public async Task<IActionResult> UpdateKoiScore([FromBody] UpdateKoiScoreDTO updateKoiScoreDTO)
-    //{
-    //    var currentUser = HttpContext.User;
-    //    var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
-    //    var currentUserId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    [Authorize]
+    [HttpGet("Update KoiScore")]
+    public async Task<IActionResult> UpdateKoiScore([FromBody] UpdateKoiScoreDTO updateKoiScoreDTO)
+    {
+        var currentUser = HttpContext.User;
+        var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+        var currentUserId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-    //    // Ki?m tra quy?n truy c?p
-    //    if (currentUserRole != "referee")
-    //    {
-    //        return BadRequest(new { message = "Unauthorized!" });
-    //    }
+        // Ki?m tra quy?n truy c?p
+        if (currentUserRole != "referee")
+        {
+            return BadRequest(new { message = "Unauthorized!" });
+        }
 
-    //    return await _koiScoreService.HandleUpdateKoiScore(currentUserId, updateKoiScoreDTO);
-    //}
+        return await _koiScoreService.HandleUpdateKoiScore(currentUserId, updateKoiScoreDTO);
+    }
+
+    [Authorize]
+    [HttpGet("Get KoiScore By UserId")]
+    public async Task<IActionResult> GetKoiScoreByUserId()
+    {
+        var currentUser = HttpContext.User;
+        var currentUserId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        return await _koiScoreService.HandleGetKoiScoreByUserId(currentUserId);
+    }
 
     //[HttpDelete("Delete KoiScore")]
     //public async Task<IActionResult> DeleteKoiScore(string koiScoreId)
