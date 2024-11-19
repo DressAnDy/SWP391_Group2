@@ -34,14 +34,7 @@ public class KoiScoreController : ControllerBase
     public async Task<IActionResult> GetKoiScoreByRefereeId()
     {
         var currentUser = HttpContext.User;
-        var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
         var currentUserId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        // Ki?m tra quy?n truy c?p
-        if (currentUserRole != "referee")
-        {
-            return BadRequest(new { message = "Unauthorized!" });
-        }
 
         return await _koiScoreService.HandleGetKoiScoreByRefereeId(currentUserId);
     }
