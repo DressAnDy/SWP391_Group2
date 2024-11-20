@@ -21,6 +21,9 @@ namespace Service.IBetKoiService
         Task<IActionResult> HandleGetAllBet();
         Task<IActionResult> HandleGetBetHistory(string userId);
         Task<IActionResult> UpdateBetStatus(string betId, string newStatus);
+
+        Task<IActionResult> HandleGetBetStatistics();
+
     }
 
     public class KoiBetService : ControllerBase, IBetKoiService
@@ -530,5 +533,47 @@ namespace Service.IBetKoiService
             }
         }
 
+        public async Task<IActionResult> HandleGetBetStatistics()
+        {
+            try
+            {
+                var totalBets = await _context.KoiBet.CountAsync();
+
+                var totalBetAmount = await _context.KoiBet.SumAsync(b => b.bet_amount);
+
+                var betStatusCounts = await _context.KoiBet
+                    .GroupBy(b => b.bet_status)
+                    .Select(group => new
+                    {
+                        Status = group.Key,
+                        Count = group.Count(),
+                        TotalAmount = group.Sum(b => b.bet_amount)
+                    })
+                    .ToListAsync();
+
+                var totalWinningAmount = await _context.KoiBet
+                    .Where(b => b.bet_status == "Win")
+                    .SumAsync(b => b.bet_amount);
+
+                var totalLosingAmount = await _context.KoiBet
+                    .Where(b => b.bet_status == "Lose")
+                    .SumAsync(b => b.bet_amount);
+
+                var statistics = new
+                {
+                    TotalBets = totalBets,
+                    TotalBetAmount = totalBetAmount,
+                    BetStatusCounts = betStatusCounts,
+                    TotalWinningAmount = totalWinningAmount,
+                    TotalLosingAmount = totalLosingAmount
+                };
+
+                return Ok(statistics);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error occurred while fetching bet statistics: {ex.Message}");
+            }
+        }
     }
 }

@@ -95,7 +95,7 @@ public class RegistrationRepo : IRegistrationRepo
                         {
                             transactions_id = hashedTranId,
                             users_id = user.user_id,
-                            Amount = +(bet.bet_amount * 2),
+                            Amount = +(bet.bet_amount * 0.80m),
                             messages = "Win bet",
                             transactions_time = DateTime.Now
                         };
