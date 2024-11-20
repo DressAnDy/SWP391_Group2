@@ -22,6 +22,12 @@ namespace KoiBet.Controllers
             return await _competitionService.HandleGetAllCompetitions();
         }
 
+        [HttpGet("Get Competition Statistics")]
+        public async Task<IActionResult> GetCompetitionStatistics()
+        {
+            return await _competitionService.HandleGetCompetitionStatistics();
+        }
+
         [HttpGet("Get competition")]
         public async Task<IActionResult> GetCompetition(string competitionId)
         {

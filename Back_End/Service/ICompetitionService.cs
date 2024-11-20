@@ -19,6 +19,7 @@ namespace Service.ICompetitionService
         Task<IActionResult> HandleUpdateCompetition(UpdateCompetitionDTO updateCompetitionDto);
         Task<IActionResult> HandleDeleteCompetition(string competitionId);
         Task<IActionResult> HandleGetCompetition(string competitionId);
+        Task<IActionResult> HandleGetCompetitionStatistics();
     }
 
     public class CompetitionService : ControllerBase, ICompetitionService
@@ -60,6 +61,35 @@ namespace Service.ICompetitionService
                 }
 
                 return Ok(competitions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving competitions: {ex.Message}");
+            }
+        }
+
+        public async Task<IActionResult> HandleGetCompetitionStatistics()
+        {
+            try
+            {
+                var compeQuery = _context.CompetitionKoi
+                    .AsQueryable();
+
+                var competitionStatics = compeQuery
+                    .GroupBy(c => c.status_competition)
+                    .ToDictionary(c => c.Key, c => c.Count());
+
+                var winnerStatics = compeQuery
+                    .GroupBy(c => c.koi_id)
+                    .ToDictionary(c => c.Key, c => c.Count());
+
+                var result = new CompetitionStatisticsDTO
+                {
+                    Competition = competitionStatics,
+                    Winner = winnerStatics
+                };
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

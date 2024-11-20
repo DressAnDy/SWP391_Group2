@@ -83,4 +83,10 @@ namespace KoiBet.DTO.Competition
         public string? CompetitionImg { get; set; }
         public int number_attendees { get; set; }
     }
+
+    public class CompetitionStatisticsDTO
+    {
+        public Dictionary<string, int> Competition { get; set; }
+        public Dictionary<string, int> Winner { get; set; }
+    }
 }

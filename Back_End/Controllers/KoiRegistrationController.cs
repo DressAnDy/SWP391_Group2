@@ -21,6 +21,12 @@ namespace KoiBet.Controllers
             return await _koiRegistrationService.HandleGetAllKoiRegistrations();
         }
 
+        //[HttpGet("Get Registration Statistics")]
+        //public async Task<IActionResult> GetRegistrationStatistics([FromQuery] string koiId)
+        //{
+        //    return await _koiRegistrationService.HandleGetRegistrationStatistics(koiId);
+        //}
+
         [HttpGet("Get KoiRegistrationById")]
         public async Task<IActionResult> GetKoiRegistrationById(string koiRegistrationId)
         {

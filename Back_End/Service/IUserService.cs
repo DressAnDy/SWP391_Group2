@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using BCrypt.Net;
+using KoiBet.DTO.Competition;
 
 namespace KoiBet.Service
 {
@@ -19,6 +20,7 @@ namespace KoiBet.Service
         Task<IActionResult> HandleUpdateUserRole(UpdateUserRoleDTO updateUserRoleDTO);
         Task<IActionResult> HandleChangePassword(string userId, PasswordChangeDTO passwordChangeDTO);
         Task<IActionResult> HandleGetAllUsersByRole(string roleId);
+        Task<IActionResult> HandleGetUserStatistics();
     }
 
     public class UserService : ControllerBase, IUserService
@@ -221,6 +223,30 @@ namespace KoiBet.Service
             await _context.SaveChangesAsync();
 
             return Ok(user);
+        }
+
+        public async Task<IActionResult> HandleGetUserStatistics()
+        {
+            try
+            {
+                var userQuery = _context.Users
+                    .AsQueryable();
+
+                var userStatics = userQuery
+                    .GroupBy(c => c.Role.role_name)
+                    .ToDictionary(c => c.Key, c => c.Count());
+
+                var result = new UserStatisticsDTO
+                {
+                    UserRoles = userStatics
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving user statistics: {ex.Message}");
+            }
         }
     }
 }

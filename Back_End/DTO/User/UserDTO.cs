@@ -25,4 +25,9 @@ namespace KoiBet.DTO.User
         public string? user_id { get; set; }
         public string? role_id { get; set; }
     }
+
+    public class UserStatisticsDTO
+    {
+        public Dictionary<string, int> UserRoles { get; set; }
+    }
 }

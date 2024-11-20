@@ -55,6 +55,12 @@ namespace KoiBet.Controllers
 
             return await _userService.HandleGetUser(userId);
         }
+        
+        [HttpGet("Get User Statistics")]
+        public async Task<IActionResult> GetUserStatistics()
+        {
+            return await _userService.HandleGetUserStatistics();
+        }
 
         // Get all users by role
         [Authorize]
