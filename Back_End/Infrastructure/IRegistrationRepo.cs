@@ -149,7 +149,7 @@ public class RegistrationRepo : IRegistrationRepo
         {
             transactions_id = hashedTranId2,
             users_id = admin.user_id,
-            Amount = -betPot,
+            Amount = betPot,
             messages = "Process bet",
             transactions_time = DateTime.Now
         };
