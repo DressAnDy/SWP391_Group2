@@ -239,7 +239,7 @@ namespace KoiBet.Service
                 }
 
                 var score = _context.KoiScore
-                    .FirstOrDefault(c => c.referee_id == refereeId && c.match_id == updateKoiScoreDTO.MatchId && c.koi_id == updateKoiScoreDTO.KoiId);
+                    .FirstOrDefault(c => c.score_id == updateKoiScoreDTO.ScoreId);
 
                 if (score == null)
                 {
