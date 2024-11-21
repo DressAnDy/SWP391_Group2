@@ -57,7 +57,7 @@ public class KoiScoreController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("Update KoiScore")]
+    [HttpPut("Update KoiScore")]
     public async Task<IActionResult> UpdateKoiScore([FromBody] UpdateKoiScoreDTO updateKoiScoreDTO)
     {
         var currentUser = HttpContext.User;
