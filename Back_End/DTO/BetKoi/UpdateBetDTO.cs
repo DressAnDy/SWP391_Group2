@@ -12,5 +12,6 @@ namespace KoiBet.DTO
         
         public string CompetitionId { get; set; } = string.Empty;
         public decimal BetAmount { get; set; }
+        public string BetStatus { get; set; }
     }
 }

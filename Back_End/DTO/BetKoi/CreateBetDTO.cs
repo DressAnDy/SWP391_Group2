@@ -7,10 +7,6 @@ namespace KoiBet.DTO
         public string RegistrationId { get; set; } = string.Empty ;
 
         public string CompetitionId { get; set; } = string.Empty;
-
-        public string MatchId {  get; set; } = string.Empty;
-
-        public string KoiId {  get; set; } = string.Empty;
         public decimal BetAmount { get; set; }
     }
 }

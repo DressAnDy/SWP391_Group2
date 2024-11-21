@@ -83,16 +83,15 @@ namespace Service.IBetKoiService
                 }
 
                 // Lấy thông tin cuộc thi
-                var match = await _context.CompetitionMatch
-                    .Include(m => m.Round)
-                        .ThenInclude(r => r.CompetitionKoi)
-                    .FirstOrDefaultAsync(m => m.match_id == createBetDto.MatchId);
+                var competition = await _context.CompetitionKoi
+                    .Include(c => c.KoiRegistrations).ThenInclude(k => k.FishKoi)
+                    .FirstOrDefaultAsync(m => m.competition_id == createBetDto.CompetitionId);
 
-                if (match == null || match.Round == null || match.Round.CompetitionKoi == null)
+                if (competition == null || competition.KoiRegistrations == null)
                 {
-                    return BadRequest("Match or associated competition not found.");
+                    return BadRequest("Fish not found.");
                 }
-                else if (match.Round.CompetitionKoi.status_competition != "Active")
+                else if (competition.status_competition != "Active")
                 {
                     return BadRequest("Competition is not available.");
                 }
@@ -100,14 +99,12 @@ namespace Service.IBetKoiService
                 var betValidate = await _context.KoiBet
                     .FirstOrDefaultAsync(c => c.users_id == createBetDto.UserId 
                     && c.registration_id == createBetDto.RegistrationId 
-                    && c.competition_id == match.Round.CompetitionKoi.competition_id);
+                    && c.competition_id == competition.competition_id);
 
                 if (betValidate != null)
                 {
                     return BadRequest("You have already placed a bet.");
                 }
-
-                var competitionId = match.Round.CompetitionKoi.competition_id;
 
                 // Tạo mã Bet mới
                 var lastBet = await _context.KoiBet
@@ -135,7 +132,7 @@ namespace Service.IBetKoiService
                     bet_id = newBetId,
                     users_id = createBetDto.UserId,
                     registration_id = createBetDto.RegistrationId,
-                    competition_id = competitionId,
+                    competition_id = competition.competition_id,
                     bet_amount = createBetDto.BetAmount,
                     bet_status = "Pending",
                     created_at = DateTime.Now,
@@ -163,15 +160,7 @@ namespace Service.IBetKoiService
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new
-                {
-                    BetId = bet.bet_id,
-                    UserId = bet.users_id,
-                    MatchId = createBetDto.MatchId,
-                    KoiId = createBetDto.KoiId,
-                    CompetitionId = competitionId,
-                    BetAmount = bet.bet_amount
-                });
+                return Ok(bet);
             }
             catch (Exception ex)
             {
@@ -399,55 +388,61 @@ namespace Service.IBetKoiService
                 }
             }
 
-            var betAmount = 0;
-
-            if(updateBetDto.BetAmount > bet.bet_amount)
+            if(updateBetDto.BetStatus == "Disabled" && bet.bet_status == "Pending")
             {
-                var amountDiff = updateBetDto.BetAmount - bet.bet_amount;
-
-                if(user.Balance < amountDiff)
-                {
-                    return BadRequest("You don't have enough balance.");
-                }
-                user.Balance -= amountDiff;
-
-                var newTranId = Guid.NewGuid().ToString();
-                var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
-
-                var transaction = new Transactions
-                {
-                    transactions_id = hashedTranId,
-                    users_id = user.user_id,
-                    Amount = -amountDiff,
-                    messages = "Update bet",
-                    transactions_time = DateTime.Now
-                };
-
-                _context.Transactions.Add(transaction);
+                user.Balance += bet.bet_amount;
             }
-            else if(updateBetDto.BetAmount < bet.bet_amount)
+            else
             {
-                var amountDiff = bet.bet_amount - updateBetDto.BetAmount;
-                user.Balance += amountDiff;
-
-                var newTranId = Guid.NewGuid().ToString();
-                var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
-
-                var transaction = new Transactions
+                if (updateBetDto.BetAmount > bet.bet_amount)
                 {
-                    transactions_id = hashedTranId,
-                    users_id = user.user_id,
-                    Amount = +amountDiff,
-                    messages = "Update bet",
-                    transactions_time = DateTime.Now
-                };
+                    var amountDiff = updateBetDto.BetAmount - bet.bet_amount;
 
-                _context.Transactions.Add(transaction);
+                    if (user.Balance < amountDiff)
+                    {
+                        return BadRequest("You don't have enough balance.");
+                    }
+                    user.Balance -= amountDiff;
+
+                    var newTranId = Guid.NewGuid().ToString();
+                    var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
+
+                    var transaction = new Transactions
+                    {
+                        transactions_id = hashedTranId,
+                        users_id = user.user_id,
+                        Amount = -amountDiff,
+                        messages = "Update bet",
+                        transactions_time = DateTime.Now
+                    };
+
+                    _context.Transactions.Add(transaction);
+                }
+                else if (updateBetDto.BetAmount < bet.bet_amount)
+                {
+                    var amountDiff = bet.bet_amount - updateBetDto.BetAmount;
+                    user.Balance += amountDiff;
+
+                    var newTranId = Guid.NewGuid().ToString();
+                    var hashedTranId = BCrypt.Net.BCrypt.HashPassword(newTranId).Substring(0, 50);
+
+                    var transaction = new Transactions
+                    {
+                        transactions_id = hashedTranId,
+                        users_id = user.user_id,
+                        Amount = +amountDiff,
+                        messages = "Update bet",
+                        transactions_time = DateTime.Now
+                    };
+
+                    _context.Transactions.Add(transaction);
+                }
             }
 
             bet.bet_amount = updateBetDto.BetAmount;
 
             _context.KoiBet.Update(bet);
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return Ok(bet);
         }
