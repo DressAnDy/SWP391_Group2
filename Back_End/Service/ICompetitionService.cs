@@ -137,7 +137,7 @@ namespace Service.ICompetitionService
                     competition_description = createCompetitionDto.competition_description,
                     start_time = createCompetitionDto.start_time,
                     end_time = createCompetitionDto.end_time,
-                    status_competition = createCompetitionDto.status_competition,
+                    status_competition = "Inactive",
                     rounds = (Math.Log(createCompetitionDto.number_attendees, 2)).ToString(),
                     category_id = createCompetitionDto.category_id,
                     koi_id = "Pending",
