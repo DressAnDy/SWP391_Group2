@@ -85,7 +85,7 @@ public class RegistrationRepo : IRegistrationRepo
                         _context.KoiBet.Update(bet);
 
                         var user = bet.User;
-                        user.Balance += (bet.bet_amount * 2);
+                        user.Balance += (bet.bet_amount * 0.80m);
                         _context.Users.Update(user);
 
                         var newTranId = Guid.NewGuid().ToString();
